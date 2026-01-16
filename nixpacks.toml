@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ["python39", "poppler_utils"]
+
+[phases.install]
+cmds = ["pip install -r backend/requirements.txt"]
+
+[phases.build]
+cmds = ["echo 'Build complete - FastAPI ready'"]
+
+[start]
+cmd = "uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT"
