@@ -339,20 +339,46 @@ export default function ProjectDetail() {
                         <div className="bg-blue-50 p-3 rounded">
                           <p className="text-gray-600">Total Area</p>
                           <p className="text-2xl font-bold text-blue-600">
-                            {extractionResult.total_floor_area_m2?.toFixed(1) || 0} m²
+                            {extractionResult.total_area_m2?.toFixed(1) || 0} m²
                           </p>
                         </div>
                       </div>
 
-                      {extractionResult.debug_image_rectangles_b64 && (
+                      {extractionResult.debug_images?.rectangles && (
                         <div className="mb-4">
                           <p className="text-sm font-medium text-gray-700 mb-2">Detected Rooms Preview:</p>
                           <img
-                            src={`data:image/png;base64,${extractionResult.debug_image_rectangles_b64}`}
+                            src={`data:image/png;base64,${extractionResult.debug_images.rectangles}`}
                             alt="Detected rooms"
                             className="w-full rounded border border-gray-300"
                           />
                         </div>
+                      )}
+
+                      {extractionResult.debug_images?.binary && (
+                        <details className="mb-4">
+                          <summary className="text-sm font-medium text-gray-700 mb-2 cursor-pointer">
+                            Show Binary Threshold Image
+                          </summary>
+                          <img
+                            src={`data:image/png;base64,${extractionResult.debug_images.binary}`}
+                            alt="Binary threshold"
+                            className="w-full rounded border border-gray-300 mt-2"
+                          />
+                        </details>
+                      )}
+
+                      {extractionResult.debug_images?.openings && (
+                        <details className="mb-4">
+                          <summary className="text-sm font-medium text-gray-700 mb-2 cursor-pointer">
+                            Show Detected Openings (Doors/Windows)
+                          </summary>
+                          <img
+                            src={`data:image/png;base64,${extractionResult.debug_images.openings}`}
+                            alt="Detected openings"
+                            className="w-full rounded border border-gray-300 mt-2"
+                          />
+                        </details>
                       )}
 
                       <div className="flex space-x-3">
