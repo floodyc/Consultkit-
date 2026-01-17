@@ -131,12 +131,27 @@ async def extract_geometry(
 
     Returns structured geometry data that can be used for load calculations.
     """
-    from gem_ai import GeometryExtractor, ExtractionParams as GemParams
+    import logging
+    logger = logging.getLogger(__name__)
+
+    logger.info(f"Extract geometry called: file_id={file_id}, project_id={project_id}")
+    logger.info(f"Params: {params}")
+
+    try:
+        from gem_ai import GeometryExtractor, ExtractionParams as GemParams
+    except ImportError as e:
+        logger.error(f"Failed to import gem_ai: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"GEM-AI module not available: {str(e)}",
+        )
 
     params = params or ExtractionParams()
+    logger.info(f"Using extraction params: {params}")
 
     # Find uploaded file
     upload_dir = os.path.join(settings.UPLOAD_DIR, project_id)
+    logger.info(f"Looking for file in: {upload_dir}")
     file_path = None
 
     for ext in [".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp", ".pdf"]:
@@ -146,23 +161,35 @@ async def extract_geometry(
             break
 
     if not file_path:
+        logger.error(f"File not found: {file_id} in {upload_dir}")
+        logger.error(f"Upload dir exists: {os.path.exists(upload_dir)}")
+        if os.path.exists(upload_dir):
+            logger.error(f"Files in dir: {os.listdir(upload_dir)}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Uploaded file not found. Please upload again.",
         )
 
+    logger.info(f"Found file: {file_path}")
+
     try:
         # Initialize GEM-AI extractor
+        logger.info("Initializing GEM-AI extractor...")
         gem_params = GemParams(
             pixels_per_metre=params.pixels_per_metre,
             floor_height_m=params.floor_height_m,
             floor_z_m=params.floor_z_m,
             detect_openings=params.detect_openings,
         )
+        logger.info(f"GEM params: {gem_params}")
+
         extractor = GeometryExtractor(params=gem_params)
+        logger.info("Extractor initialized successfully")
 
         # Extract geometry
+        logger.info(f"Starting extraction from: {file_path}")
         geometry = extractor.extract_from_file(file_path)
+        logger.info(f"Extraction complete. Found {len(geometry.rooms)} rooms")
 
         # Convert to response format
         rooms = [
@@ -190,6 +217,7 @@ async def extract_geometry(
             for o in geometry.openings
         ]
 
+        logger.info(f"Building response with {len(rooms)} rooms")
         return ExtractionResult(
             file_id=file_id,
             filename=os.path.basename(file_path),
@@ -204,9 +232,12 @@ async def extract_geometry(
         )
 
     except Exception as e:
+        logger.error(f"Extraction failed with exception: {type(e).__name__}: {str(e)}")
+        import traceback
+        logger.error(f"Traceback:\n{traceback.format_exc()}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Geometry extraction failed: {str(e)}",
+            detail=f"Geometry extraction failed: {type(e).__name__}: {str(e)}",
         )
 
 
