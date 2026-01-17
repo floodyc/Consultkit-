@@ -82,7 +82,8 @@ export class APIClient {
 
   // Projects
   async getProjects() {
-    return this.request('/api/v1/projects')
+    const response = await this.request('/api/v1/projects/')
+    return response.projects || []
   }
 
   async createProject(data: {
@@ -91,10 +92,16 @@ export class APIClient {
     location?: string
     building_type?: string
   }) {
-    return this.request('/api/v1/projects', {
+    const response = await this.request('/api/v1/projects/', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        name: data.name,
+        description: data.description,
+        city: data.location,
+        building_type: data.building_type || 'office',
+      }),
     })
+    return response
   }
 
   async getProject(id: string) {
