@@ -148,34 +148,64 @@ export class APIClient {
 
   // GEM-AI Geometry Extraction
   async uploadFloorplan(projectId: string, file: File) {
+    console.log('[API] uploadFloorplan called with:', {
+      projectId,
+      fileName: file.name,
+      fileType: file.type,
+      fileSize: file.size
+    })
+
     const formData = new FormData()
     formData.append('file', file)
     formData.append('project_id', projectId)
+
+    console.log('[API] FormData entries:')
+    for (const [key, value] of formData.entries()) {
+      console.log(`  ${key}:`, value instanceof File ? `File(${value.name}, ${value.type})` : value)
+    }
 
     const headers: Record<string, string> = {}
     if (this.token) {
       headers['Authorization'] = `Bearer ${this.token}`
     }
 
+    console.log('[API] Sending POST to /api/v1/geometry/upload')
     const response = await fetch(`${API_URL}/api/v1/geometry/upload`, {
       method: 'POST',
       headers,
       body: formData,
     })
 
+    console.log('[API] Response status:', response.status, response.statusText)
+
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: 'Upload failed' }))
+      const errorText = await response.text()
+      console.error('[API] Error response body:', errorText)
+
+      let error
+      try {
+        error = JSON.parse(errorText)
+      } catch {
+        error = { detail: errorText || 'Upload failed' }
+      }
+
+      console.error('[API] Parsed error:', error)
 
       // Handle FastAPI validation errors (array format)
       if (Array.isArray(error.detail)) {
-        const messages = error.detail.map((e: any) => e.msg || JSON.stringify(e)).join(', ')
+        const messages = error.detail.map((e: any) => {
+          console.log('[API] Validation error:', e)
+          return e.msg || JSON.stringify(e)
+        }).join(', ')
         throw new Error(messages)
       }
 
       throw new Error(error.detail || 'Upload failed')
     }
 
-    return response.json()
+    const result = await response.json()
+    console.log('[API] Upload successful:', result)
+    return result
   }
 
   async extractGeometry(fileId: string, projectId: string, params?: {
@@ -184,37 +214,63 @@ export class APIClient {
     floor_z_m?: number
     detect_openings?: boolean
   }) {
-    const formData = new FormData()
-    formData.append('project_id', projectId)
-    if (params?.pixels_per_metre) formData.append('pixels_per_metre', params.pixels_per_metre.toString())
-    if (params?.floor_height_m) formData.append('floor_height_m', params.floor_height_m.toString())
-    if (params?.floor_z_m) formData.append('floor_z_m', params.floor_z_m.toString())
-    if (params?.detect_openings !== undefined) formData.append('detect_openings', params.detect_openings.toString())
+    console.log('[API] extractGeometry called with:', { fileId, projectId, params })
 
-    const headers: Record<string, string> = {}
+    // Build query parameters
+    const queryParams = new URLSearchParams({ project_id: projectId })
+
+    // Build request body with extraction params
+    const body = params ? JSON.stringify(params) : null
+
+    console.log('[API] Request body:', body)
+    console.log('[API] Query params:', queryParams.toString())
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    }
     if (this.token) {
       headers['Authorization'] = `Bearer ${this.token}`
     }
 
-    const response = await fetch(`${API_URL}/api/v1/geometry/extract/${fileId}`, {
+    const url = `${API_URL}/api/v1/geometry/extract/${fileId}?${queryParams}`
+    console.log('[API] Sending POST to:', url)
+
+    const response = await fetch(url, {
       method: 'POST',
       headers,
-      body: formData,
+      body,
     })
 
+    console.log('[API] Extract response status:', response.status, response.statusText)
+
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: 'Extraction failed' }))
+      const errorText = await response.text()
+      console.error('[API] Extract error response:', errorText)
+
+      let error
+      try {
+        error = JSON.parse(errorText)
+      } catch {
+        error = { detail: errorText || 'Extraction failed' }
+      }
+
+      console.error('[API] Parsed extract error:', error)
 
       // Handle FastAPI validation errors (array format)
       if (Array.isArray(error.detail)) {
-        const messages = error.detail.map((e: any) => e.msg || JSON.stringify(e)).join(', ')
+        const messages = error.detail.map((e: any) => {
+          console.log('[API] Extract validation error:', e)
+          return e.msg || JSON.stringify(e)
+        }).join(', ')
         throw new Error(messages)
       }
 
       throw new Error(error.detail || 'Extraction failed')
     }
 
-    return response.json()
+    const result = await response.json()
+    console.log('[API] Extraction successful:', result)
+    return result
   }
 
   async applyGeometryToProject(projectId: string, extractionData: any) {
