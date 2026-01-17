@@ -8,7 +8,7 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, Query, UploadFile, status
 from pydantic import BaseModel
 
 from app.core.config import settings
@@ -117,8 +117,8 @@ async def upload_floorplan(
 @router.post("/extract/{file_id}", response_model=ExtractionResult)
 async def extract_geometry(
     file_id: str,
-    project_id: str,
-    params: Optional[ExtractionParams] = None,
+    project_id: str = Query(..., description="Project ID for uploaded floorplan"),
+    params: Optional[ExtractionParams] = Body(None, description="Extraction parameters"),
     current_user: dict = Depends(get_current_user),
 ):
     """

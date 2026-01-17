@@ -1,5 +1,14 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
+// Log API URL on initialization (helps debug configuration issues)
+if (typeof window !== 'undefined') {
+  console.log('[API] Configuration:', {
+    API_URL,
+    env: process.env.NEXT_PUBLIC_API_URL,
+    defaulting: !process.env.NEXT_PUBLIC_API_URL
+  })
+}
+
 export class APIClient {
   private token: string | null = null
 
@@ -169,12 +178,30 @@ export class APIClient {
       headers['Authorization'] = `Bearer ${this.token}`
     }
 
-    console.log('[API] Sending POST to /api/v1/geometry/upload')
-    const response = await fetch(`${API_URL}/api/v1/geometry/upload`, {
-      method: 'POST',
-      headers,
-      body: formData,
-    })
+    const url = `${API_URL}/api/v1/geometry/upload`
+    console.log('[API] Sending POST to:', url)
+
+    let response
+    try {
+      response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: formData,
+      })
+    } catch (fetchError: any) {
+      console.error('[API] Fetch failed - network error:', fetchError)
+      console.error('[API] This usually means:', {
+        possibleCauses: [
+          'Backend server is not running',
+          'CORS is blocking the request',
+          'Network connectivity issue',
+          'Wrong API_URL configured'
+        ],
+        currentAPIURL: API_URL,
+        attemptedURL: url
+      })
+      throw new Error(`Network error: ${fetchError.message}. Check console for details.`)
+    }
 
     console.log('[API] Response status:', response.status, response.statusText)
 
