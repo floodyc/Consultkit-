@@ -128,6 +128,12 @@ export default function ProjectDetail() {
         extractionParams
       )
 
+      console.log('[EXTRACTION] Full result:', extractResult)
+      console.log('[EXTRACTION] Debug images keys:', Object.keys(extractResult.debug_images || {}))
+      console.log('[EXTRACTION] Has rectangles?', !!extractResult.debug_images?.rectangles)
+      console.log('[EXTRACTION] Has binary?', !!extractResult.debug_images?.binary)
+      console.log('[EXTRACTION] Rectangles length:', extractResult.debug_images?.rectangles?.length || 0)
+
       setExtractionResult(extractResult)
       setUploadingFloorplan(false)
       setExtracting(false)
