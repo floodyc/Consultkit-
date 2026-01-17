@@ -110,9 +110,23 @@ export class APIClient {
 
   // Spaces
   async createSpace(projectId: string, data: any) {
+    // Transform frontend data to match backend SpaceData model
+    const spaceData = {
+      id: crypto.randomUUID(),
+      name: data.name,
+      space_type: 'office', // Default space type
+      floor_area: data.area,
+      volume: data.area * data.ceiling_height,
+      height: data.ceiling_height,
+      cooling_setpoint: 24.0,
+      heating_setpoint: 21.0,
+      lighting_power_density: data.lighting_watts / data.area || 10.0,
+      equipment_power_density: 10.0,
+    }
+
     return this.request(`/api/v1/projects/${projectId}/spaces`, {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify(spaceData),
     })
   }
 
