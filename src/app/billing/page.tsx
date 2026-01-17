@@ -112,16 +112,27 @@ export default function Billing() {
       <nav className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
+            <div className="flex items-center space-x-8">
+              <h1 className="text-2xl font-bold text-gray-900">HVACplus</h1>
+              <div className="flex space-x-4">
+                <button
+                  onClick={() => router.push('/dashboard')}
+                  className="text-sm font-medium text-gray-700 hover:text-indigo-600"
+                >
+                  Projects
+                </button>
+                <button
+                  onClick={() => router.push('/billing')}
+                  className="text-sm font-medium text-indigo-600 border-b-2 border-indigo-600"
+                >
+                  Billing
+                </button>
+              </div>
+            </div>
             <div className="flex items-center space-x-4">
-              <button
-                onClick={() => router.push('/dashboard')}
-                className="text-gray-600 hover:text-gray-900"
-              >
-                ← Back
-              </button>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Billing & Credits
-              </h1>
+              <span className="text-sm text-gray-600">
+                {user?.full_name} • {user?.credits} credits
+              </span>
             </div>
           </div>
         </div>
