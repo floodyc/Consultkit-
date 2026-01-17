@@ -136,9 +136,9 @@ export class APIClient {
 
   // Calculations
   async runCalculation(projectId: string, data: any) {
-    return this.request(`/api/v1/calculations/run`, {
+    return this.request(`/api/v1/calculations/${projectId}/run`, {
       method: 'POST',
-      body: JSON.stringify({ project_id: projectId, ...data }),
+      body: JSON.stringify(data),
     })
   }
 
