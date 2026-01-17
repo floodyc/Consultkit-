@@ -6,13 +6,38 @@ Professional ASHRAE heating and cooling load calculation platform.
 """
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.base import BaseHTTPMiddleware
 import os
 
 from app.core.config import settings
 from app.api import router as api_router
+
+
+class CORSPreflightMiddleware(BaseHTTPMiddleware):
+    """Handle CORS preflight requests explicitly."""
+
+    async def dispatch(self, request: Request, call_next):
+        if request.method == "OPTIONS":
+            # Return preflight response
+            response = Response()
+            origin = request.headers.get("origin")
+
+            # Check if origin is allowed
+            if origin in settings.CORS_ORIGINS:
+                response.headers["Access-Control-Allow-Origin"] = origin
+                response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+                response.headers["Access-Control-Allow-Headers"] = "*"
+                response.headers["Access-Control-Allow-Credentials"] = "true"
+                response.headers["Access-Control-Max-Age"] = "600"
+
+            return response
+
+        # For non-OPTIONS requests, continue normally
+        response = await call_next(request)
+        return response
 
 
 @asynccontextmanager
@@ -57,13 +82,17 @@ app = FastAPI(
     openapi_url="/api/openapi.json",
 )
 
+# Add custom preflight middleware first
+app.add_middleware(CORSPreflightMiddleware)
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Include API router
