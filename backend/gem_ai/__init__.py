@@ -6,7 +6,7 @@ from .geometry_extractor import (
     ExtractedGeometry,
     ExtractionParams,
     DetectedOpening,
-    ExtractedRoom,
+    DetectedRoom,
 )
 from .gbxml_writer import GbXMLWriter
 
@@ -15,6 +15,6 @@ __all__ = [
     "ExtractedGeometry",
     "ExtractionParams",
     "DetectedOpening",
-    "ExtractedRoom",
+    "DetectedRoom",
     "GbXMLWriter",
 ]
