@@ -29,6 +29,10 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copy backend code
 COPY backend/ /app/backend/
 
+# Copy startup script
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
 # Create upload directory
 RUN mkdir -p /app/uploads
 
@@ -36,4 +40,4 @@ RUN mkdir -p /app/uploads
 EXPOSE 8000
 
 # Start the application
-CMD ["sh", "-c", "uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["/app/start.sh"]
