@@ -131,7 +131,17 @@ export default function ProjectDetail() {
       setUploadingFloorplan(false)
       setExtracting(false)
     } catch (err: any) {
-      alert(err.message || 'Failed to process floorplan')
+      console.error('Floorplan processing error:', err)
+
+      // Format error message
+      let errorMessage = 'Failed to process floorplan'
+      if (err.message) {
+        errorMessage = err.message
+      } else if (typeof err === 'string') {
+        errorMessage = err
+      }
+
+      alert(errorMessage)
       setUploadingFloorplan(false)
       setExtracting(false)
       setFloorplanFile(null)

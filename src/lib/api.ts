@@ -165,6 +165,13 @@ export class APIClient {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ detail: 'Upload failed' }))
+
+      // Handle FastAPI validation errors (array format)
+      if (Array.isArray(error.detail)) {
+        const messages = error.detail.map((e: any) => e.msg || JSON.stringify(e)).join(', ')
+        throw new Error(messages)
+      }
+
       throw new Error(error.detail || 'Upload failed')
     }
 
@@ -197,6 +204,13 @@ export class APIClient {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ detail: 'Extraction failed' }))
+
+      // Handle FastAPI validation errors (array format)
+      if (Array.isArray(error.detail)) {
+        const messages = error.detail.map((e: any) => e.msg || JSON.stringify(e)).join(', ')
+        throw new Error(messages)
+      }
+
       throw new Error(error.detail || 'Extraction failed')
     }
 
