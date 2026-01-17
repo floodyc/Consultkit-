@@ -23,6 +23,18 @@ export default function ProjectDetail() {
     lighting_watts: 0,
   })
 
+  // GEM-AI state
+  const [showGemAI, setShowGemAI] = useState(false)
+  const [uploadingFloorplan, setUploadingFloorplan] = useState(false)
+  const [extracting, setExtracting] = useState(false)
+  const [extractionResult, setExtractionResult] = useState<any>(null)
+  const [floorplanFile, setFloorplanFile] = useState<File | null>(null)
+  const [extractionParams, setExtractionParams] = useState({
+    pixels_per_metre: 50,
+    floor_height_m: 3.0,
+    detect_openings: true,
+  })
+
   useEffect(() => {
     loadData()
   }, [projectId])
@@ -80,6 +92,71 @@ export default function ProjectDetail() {
     } finally {
       setCalculating(false)
     }
+  }
+
+  // GEM-AI handlers
+  const handleFloorplanUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/tiff', 'image/bmp', 'application/pdf']
+    if (!validTypes.includes(file.type)) {
+      alert('Please upload a valid image file (PNG, JPG, TIFF, BMP) or PDF')
+      return
+    }
+
+    // Validate file size (50MB max)
+    if (file.size > 50 * 1024 * 1024) {
+      alert('File size must be less than 50MB')
+      return
+    }
+
+    setFloorplanFile(file)
+    setUploadingFloorplan(true)
+    setExtracting(true)
+
+    try {
+      // Step 1: Upload floorplan
+      const uploadResult = await api.uploadFloorplan(projectId, file)
+
+      // Step 2: Extract geometry
+      const extractResult = await api.extractGeometry(
+        uploadResult.file_id,
+        projectId,
+        extractionParams
+      )
+
+      setExtractionResult(extractResult)
+      setUploadingFloorplan(false)
+      setExtracting(false)
+    } catch (err: any) {
+      alert(err.message || 'Failed to process floorplan')
+      setUploadingFloorplan(false)
+      setExtracting(false)
+      setFloorplanFile(null)
+    }
+  }
+
+  const handleApplyExtraction = async () => {
+    if (!extractionResult) return
+
+    try {
+      await api.applyGeometryToProject(projectId, extractionResult)
+      setShowGemAI(false)
+      setExtractionResult(null)
+      setFloorplanFile(null)
+      loadData()
+      alert(`Successfully added ${extractionResult.rooms?.length || 0} spaces from floorplan!`)
+    } catch (err: any) {
+      alert(err.message || 'Failed to apply geometry')
+    }
+  }
+
+  const handleCancelExtraction = () => {
+    setShowGemAI(false)
+    setExtractionResult(null)
+    setFloorplanFile(null)
   }
 
   if (loading) {
@@ -143,15 +220,131 @@ export default function ProjectDetail() {
             </div>
           </div>
 
+          {/* GEM-AI Floorplan Upload Section */}
+          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg shadow-md p-6 mb-6 border-2 border-indigo-200">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 flex items-center">
+                  🤖 GEM-AI Geometry Extraction
+                </h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Upload a floorplan image and let AI extract room geometry automatically
+                </p>
+              </div>
+              {!showGemAI && (
+                <button
+                  onClick={() => setShowGemAI(true)}
+                  className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold shadow-md"
+                >
+                  📤 Upload Floorplan
+                </button>
+              )}
+            </div>
+
+            {showGemAI && (
+              <div className="mt-4 space-y-4">
+                {!extractionResult ? (
+                  <div>
+                    <label className="block w-full">
+                      <div className="border-2 border-dashed border-indigo-300 rounded-lg p-8 text-center hover:border-indigo-500 transition-colors cursor-pointer bg-white">
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg,image/jpg,image/tiff,image/bmp,application/pdf"
+                          onChange={handleFloorplanUpload}
+                          className="hidden"
+                          disabled={uploadingFloorplan}
+                        />
+                        {uploadingFloorplan || extracting ? (
+                          <div className="space-y-3">
+                            <div className="animate-spin h-12 w-12 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto"></div>
+                            <p className="text-lg font-semibold text-gray-900">
+                              {uploadingFloorplan ? '📤 Uploading floorplan...' : '🤖 Extracting geometry...'}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              This may take a few seconds
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            <div className="text-6xl">📋</div>
+                            <p className="text-lg font-semibold text-gray-900">
+                              Click to upload floorplan
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              Supports PNG, JPG, TIFF, BMP, PDF (max 50MB)
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </label>
+
+                    <button
+                      onClick={handleCancelExtraction}
+                      className="mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="bg-white rounded-lg p-4 border border-indigo-200">
+                      <h4 className="font-semibold text-lg mb-3">✅ Extraction Complete!</h4>
+                      <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                        <div className="bg-green-50 p-3 rounded">
+                          <p className="text-gray-600">Rooms Detected</p>
+                          <p className="text-2xl font-bold text-green-600">
+                            {extractionResult.rooms?.length || 0}
+                          </p>
+                        </div>
+                        <div className="bg-blue-50 p-3 rounded">
+                          <p className="text-gray-600">Total Area</p>
+                          <p className="text-2xl font-bold text-blue-600">
+                            {extractionResult.total_floor_area_m2?.toFixed(1) || 0} m²
+                          </p>
+                        </div>
+                      </div>
+
+                      {extractionResult.debug_image_rectangles_b64 && (
+                        <div className="mb-4">
+                          <p className="text-sm font-medium text-gray-700 mb-2">Detected Rooms Preview:</p>
+                          <img
+                            src={`data:image/png;base64,${extractionResult.debug_image_rectangles_b64}`}
+                            alt="Detected rooms"
+                            className="w-full rounded border border-gray-300"
+                          />
+                        </div>
+                      )}
+
+                      <div className="flex space-x-3">
+                        <button
+                          onClick={handleApplyExtraction}
+                          className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold"
+                        >
+                          ✅ Apply to Project
+                        </button>
+                        <button
+                          onClick={handleCancelExtraction}
+                          className="flex-1 px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900">
               Spaces ({spaces.length})
             </h2>
             <button
               onClick={() => setShowAddSpace(true)}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
             >
-              + Add Space
+              ✏️ Add Space Manually
             </button>
           </div>
 
