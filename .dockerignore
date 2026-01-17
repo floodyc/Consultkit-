@@ -1,0 +1,44 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Frontend (not needed for backend)
+node_modules/
+.next/
+out/
+build/
+
+# Docs
+*.md
+README.md
+
+# Config files not needed in container
+.env
+.env.example
+nixpacks.toml
+railway.toml
+Procfile
+runtime.txt
