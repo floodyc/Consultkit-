@@ -145,6 +145,70 @@ export class APIClient {
   async getCalculationResults(calculationId: string) {
     return this.request(`/api/v1/calculations/${calculationId}/results`)
   }
+
+  // GEM-AI Geometry Extraction
+  async uploadFloorplan(projectId: string, file: File) {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('project_id', projectId)
+
+    const headers: Record<string, string> = {}
+    if (this.token) {
+      headers['Authorization'] = `Bearer ${this.token}`
+    }
+
+    const response = await fetch(`${API_URL}/api/v1/geometry/upload`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ detail: 'Upload failed' }))
+      throw new Error(error.detail || 'Upload failed')
+    }
+
+    return response.json()
+  }
+
+  async extractGeometry(fileId: string, projectId: string, params?: {
+    pixels_per_metre?: number
+    floor_height_m?: number
+    floor_z_m?: number
+    detect_openings?: boolean
+  }) {
+    const formData = new FormData()
+    formData.append('project_id', projectId)
+    if (params?.pixels_per_metre) formData.append('pixels_per_metre', params.pixels_per_metre.toString())
+    if (params?.floor_height_m) formData.append('floor_height_m', params.floor_height_m.toString())
+    if (params?.floor_z_m) formData.append('floor_z_m', params.floor_z_m.toString())
+    if (params?.detect_openings !== undefined) formData.append('detect_openings', params.detect_openings.toString())
+
+    const headers: Record<string, string> = {}
+    if (this.token) {
+      headers['Authorization'] = `Bearer ${this.token}`
+    }
+
+    const response = await fetch(`${API_URL}/api/v1/geometry/extract/${fileId}`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ detail: 'Extraction failed' }))
+      throw new Error(error.detail || 'Extraction failed')
+    }
+
+    return response.json()
+  }
+
+  async applyGeometryToProject(projectId: string, extractionData: any) {
+    return this.request(`/api/v1/geometry/apply-to-project/${projectId}`, {
+      method: 'POST',
+      body: JSON.stringify(extractionData),
+    })
+  }
 }
 
 export const api = new APIClient()
