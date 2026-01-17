@@ -158,6 +158,32 @@ export default function ProjectSettings() {
         </div>
       </nav>
 
+      {/* Tab Navigation */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav className="flex space-x-8" aria-label="Tabs">
+            <button
+              onClick={() => router.push(`/projects/${projectId}`)}
+              className="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            >
+              Overview
+            </button>
+            <button
+              onClick={() => router.push(`/projects/${projectId}/settings`)}
+              className="border-b-2 border-indigo-500 py-4 px-1 text-sm font-medium text-indigo-600"
+            >
+              Settings
+            </button>
+            <button
+              onClick={() => router.push(`/projects/${projectId}/results`)}
+              className="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            >
+              Results
+            </button>
+          </nav>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="flex gap-6">
           {/* Sidebar Tabs */}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { api } from '@/lib/api'
 
@@ -8,6 +8,7 @@ export default function ProjectDetail() {
   const router = useRouter()
   const params = useParams()
   const projectId = params.id as string
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [project, setProject] = useState<any>(null)
   const [spaces, setSpaces] = useState<any[]>([])
@@ -204,6 +205,32 @@ export default function ProjectDetail() {
         </div>
       </nav>
 
+      {/* Tab Navigation */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav className="flex space-x-8" aria-label="Tabs">
+            <button
+              onClick={() => router.push(`/projects/${projectId}`)}
+              className="border-b-2 border-indigo-500 py-4 px-1 text-sm font-medium text-indigo-600"
+            >
+              Overview
+            </button>
+            <button
+              onClick={() => router.push(`/projects/${projectId}/settings`)}
+              className="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            >
+              Settings
+            </button>
+            <button
+              onClick={() => router.push(`/projects/${projectId}/results`)}
+              className="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            >
+              Results
+            </button>
+          </nav>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="bg-white rounded-lg shadow p-6 mb-6">
@@ -253,40 +280,43 @@ export default function ProjectDetail() {
 
             {showGemAI && (
               <div className="mt-4 space-y-4">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg,image/tiff,image/bmp,application/pdf"
+                  onChange={handleFloorplanUpload}
+                  className="hidden"
+                  disabled={uploadingFloorplan}
+                />
+
                 {!extractionResult ? (
                   <div>
-                    <label className="block w-full">
-                      <div className="border-2 border-dashed border-indigo-300 rounded-lg p-8 text-center hover:border-indigo-500 transition-colors cursor-pointer bg-white">
-                        <input
-                          type="file"
-                          accept="image/png,image/jpeg,image/jpg,image/tiff,image/bmp,application/pdf"
-                          onChange={handleFloorplanUpload}
-                          className="hidden"
-                          disabled={uploadingFloorplan}
-                        />
-                        {uploadingFloorplan || extracting ? (
-                          <div className="space-y-3">
-                            <div className="animate-spin h-12 w-12 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto"></div>
-                            <p className="text-lg font-semibold text-gray-900">
-                              {uploadingFloorplan ? '📤 Uploading floorplan...' : '🤖 Extracting geometry...'}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              This may take a few seconds
-                            </p>
-                          </div>
-                        ) : (
-                          <div className="space-y-3">
-                            <div className="text-6xl">📋</div>
-                            <p className="text-lg font-semibold text-gray-900">
-                              Click to upload floorplan
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              Supports PNG, JPG, TIFF, BMP, PDF (max 50MB)
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </label>
+                    <div
+                      onClick={() => !uploadingFloorplan && !extracting && fileInputRef.current?.click()}
+                      className="border-2 border-dashed border-indigo-300 rounded-lg p-8 text-center hover:border-indigo-500 transition-colors cursor-pointer bg-white"
+                    >
+                      {uploadingFloorplan || extracting ? (
+                        <div className="space-y-3">
+                          <div className="animate-spin h-12 w-12 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto"></div>
+                          <p className="text-lg font-semibold text-gray-900">
+                            {uploadingFloorplan ? '📤 Uploading floorplan...' : '🤖 Extracting geometry...'}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            This may take a few seconds
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <div className="text-6xl">📋</div>
+                          <p className="text-lg font-semibold text-gray-900">
+                            Click to upload floorplan
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Supports PNG, JPG, TIFF, BMP, PDF (max 50MB)
+                          </p>
+                        </div>
+                      )}
+                    </div>
 
                     <button
                       onClick={handleCancelExtraction}
