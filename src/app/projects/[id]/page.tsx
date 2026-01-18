@@ -3,6 +3,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { api } from '@/lib/api'
+import dynamic from 'next/dynamic'
+
+// Dynamically import OBJViewer to avoid SSR issues with Three.js
+const OBJViewer = dynamic(() => import('@/components/OBJViewer'), { ssr: false })
 
 export default function ProjectDetail() {
   const router = useRouter()
@@ -459,6 +463,19 @@ export default function ProjectDetail() {
                             className="w-full rounded border border-gray-300 mt-2"
                           />
                         </details>
+                      )}
+
+                      {/* 3D Visualization */}
+                      {extractionResult.obj_content && (
+                        <div className="mb-4">
+                          <p className="text-sm font-medium text-gray-700 mb-2">🎨 3D Preview:</p>
+                          <div className="bg-gray-50 rounded-lg p-4">
+                            <OBJViewer objContent={extractionResult.obj_content} width={600} height={400} />
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2 text-center">
+                            Preview your extracted geometry in 3D before applying to project
+                          </p>
+                        </div>
                       )}
 
                       <div className="flex space-x-3">
