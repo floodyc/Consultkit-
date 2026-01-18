@@ -17,6 +17,7 @@ from .models import (
     InternalLoad,
     Infiltration,
     Ventilation,
+    SpaceType,
 )
 from .results import (
     SpaceLoadResult,
@@ -43,6 +44,7 @@ __all__ = [
     "InternalLoad",
     "Infiltration",
     "Ventilation",
+    "SpaceType",
     "SpaceLoadResult",
     "ZoneLoadResult",
     "SystemLoadResult",
