@@ -39,24 +39,37 @@ export default function OBJViewer({ objContent, width = 600, height = 400 }: OBJ
     containerRef.current.appendChild(renderer.domElement)
     rendererRef.current = renderer
 
+    // Parse OBJ content first to get geometry size
+    const geometry = parseOBJ(objContent)
+
+    // Calculate bounding box for proper scaling
+    geometry.computeBoundingBox()
+    const boundingBox = geometry.boundingBox!
+    const center = new THREE.Vector3()
+    boundingBox.getCenter(center)
+
+    const size = new THREE.Vector3()
+    boundingBox.getSize(size)
+    const maxDim = Math.max(size.x, size.y, size.z)
+
     // Lighting
     const ambientLight = new THREE.AmbientLight(0x404040, 2)
     scene.add(ambientLight)
 
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
-    directionalLight.position.set(10, 10, 10)
+    directionalLight.position.set(maxDim, maxDim, maxDim)
     scene.add(directionalLight)
 
-    // Grid helper
-    const gridHelper = new THREE.GridHelper(100, 100, 0xcccccc, 0xeeeeee)
+    // Grid helper - sized to match geometry
+    const gridSize = Math.max(maxDim * 2, 10)
+    const gridDivisions = Math.ceil(gridSize / 2)
+    const gridHelper = new THREE.GridHelper(gridSize, gridDivisions, 0xcccccc, 0xeeeeee)
+    gridHelper.position.y = boundingBox.min.y // Place grid at floor level
     scene.add(gridHelper)
 
-    // Axes helper
-    const axesHelper = new THREE.AxesHelper(5)
+    // Axes helper - scaled to geometry
+    const axesHelper = new THREE.AxesHelper(maxDim * 0.5)
     scene.add(axesHelper)
-
-    // Parse OBJ content
-    const geometry = parseOBJ(objContent)
 
     // Create mesh with material
     const material = new THREE.MeshPhongMaterial({
@@ -78,21 +91,12 @@ export default function OBJViewer({ objContent, width = 600, height = 400 }: OBJ
     )
     mesh.add(wireframe)
 
-    // Calculate bounding box and center camera
-    geometry.computeBoundingBox()
-    const boundingBox = geometry.boundingBox!
-    const center = new THREE.Vector3()
-    boundingBox.getCenter(center)
-
-    const size = new THREE.Vector3()
-    boundingBox.getSize(size)
-    const maxDim = Math.max(size.x, size.y, size.z)
-
-    // Position camera to see the entire model
+    // Position camera closer to see the model better
+    const distance = maxDim * 1.8
     camera.position.set(
-      center.x + maxDim * 1.5,
-      center.y + maxDim * 1.5,
-      center.z + maxDim * 1.5
+      center.x + distance * 0.7,
+      center.y + distance * 0.7,
+      center.z + distance * 0.7
     )
     camera.lookAt(center)
 
