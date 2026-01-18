@@ -4,13 +4,25 @@ import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
+interface Room {
+  id: string
+  name: string
+  x: number
+  y: number
+  z: number
+  width: number
+  depth: number
+  height: number
+}
+
 interface OBJViewerProps {
   objContent: string
+  rooms?: Room[]
   width?: number
   height?: number
 }
 
-export default function OBJViewer({ objContent, width = 600, height = 400 }: OBJViewerProps) {
+export default function OBJViewer({ objContent, rooms = [], width = 600, height = 400 }: OBJViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<THREE.Scene | null>(null)
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null)
@@ -92,12 +104,13 @@ export default function OBJViewer({ objContent, width = 600, height = 400 }: OBJ
     const axesHelper = new THREE.AxesHelper(maxDim * 0.5)
     scene.add(axesHelper)
 
-    // Create mesh with material
+    // Create mesh with material - solid and opaque
     const material = new THREE.MeshPhongMaterial({
       color: 0x4f46e5,
       side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.8,
+      transparent: false,
+      opacity: 1.0,
+      shininess: 30,
     })
 
     const mesh = new THREE.Mesh(geometry, material)
@@ -119,6 +132,51 @@ export default function OBJViewer({ objContent, width = 600, height = 400 }: OBJ
     )
     mesh.add(wireframe)
     console.log('[OBJViewer] Added wireframe, total children:', mesh.children.length)
+
+    // Add room labels if rooms data is provided
+    if (rooms && rooms.length > 0) {
+      console.log('[OBJViewer] Adding labels for', rooms.length, 'rooms')
+      rooms.forEach((room) => {
+        // Create canvas for text
+        const canvas = document.createElement('canvas')
+        const context = canvas.getContext('2d')
+        if (!context) return
+
+        canvas.width = 256
+        canvas.height = 64
+
+        // Draw text on canvas
+        context.fillStyle = '#ffffff'
+        context.fillRect(0, 0, canvas.width, canvas.height)
+        context.font = 'Bold 24px Arial'
+        context.fillStyle = '#000000'
+        context.textAlign = 'center'
+        context.textBaseline = 'middle'
+        context.fillText(room.name, canvas.width / 2, canvas.height / 2)
+
+        // Create texture from canvas
+        const texture = new THREE.CanvasTexture(canvas)
+        const spriteMaterial = new THREE.SpriteMaterial({
+          map: texture,
+          transparent: true,
+        })
+        const sprite = new THREE.Sprite(spriteMaterial)
+
+        // Position sprite at center of room, slightly above floor
+        sprite.position.set(
+          room.x + room.width / 2,
+          room.z + room.height * 0.9,
+          room.y + room.depth / 2
+        )
+
+        // Scale sprite based on room size
+        const labelScale = Math.min(room.width, room.depth) * 0.4
+        sprite.scale.set(labelScale, labelScale * 0.25, 1)
+
+        scene.add(sprite)
+        console.log('[OBJViewer] Added label for room:', room.name, 'at', sprite.position)
+      })
+    }
 
     // Position camera much closer to fill the viewport
     const distance = maxDim * 1.2
