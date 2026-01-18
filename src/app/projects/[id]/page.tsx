@@ -20,7 +20,10 @@ export default function ProjectDetail() {
   const [loading, setLoading] = useState(true)
   const [showAddSpace, setShowAddSpace] = useState(false)
   const [showEditSpace, setShowEditSpace] = useState(false)
+  const [showBulkEdit, setShowBulkEdit] = useState(false)
   const [editingSpace, setEditingSpace] = useState<any>(null)
+  const [selectedSpaces, setSelectedSpaces] = useState<Set<string>>(new Set())
+  const [bulkEditData, setBulkEditData] = useState<any>({})
   const [calculating, setCalculating] = useState(false)
   const [designStandard, setDesignStandard] = useState<DesignStandard>('ASHRAE_90_1')
   const [newSpace, setNewSpace] = useState({
@@ -199,13 +202,68 @@ export default function ProjectDetail() {
 
     try {
       await api.applyGeometryToProject(projectId, extractionResult)
+      // Don't clear extractionResult - keep geometry visible
       setShowGemAI(false)
-      setExtractionResult(null)
       setFloorplanFile(null)
       loadData()
       alert(`Successfully added ${extractionResult.rooms?.length || 0} spaces from floorplan!`)
     } catch (err: any) {
       alert(err.message || 'Failed to apply geometry')
+    }
+  }
+
+  const toggleSpaceSelection = (spaceId: string) => {
+    const newSelected = new Set(selectedSpaces)
+    if (newSelected.has(spaceId)) {
+      newSelected.delete(spaceId)
+    } else {
+      newSelected.add(spaceId)
+    }
+    setSelectedSpaces(newSelected)
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedSpaces.size === spaces.length) {
+      setSelectedSpaces(new Set())
+    } else {
+      setSelectedSpaces(new Set(spaces.map(s => s.id)))
+    }
+  }
+
+  const handleBulkEdit = () => {
+    if (selectedSpaces.size === 0) {
+      alert('Please select at least one space')
+      return
+    }
+    setBulkEditData({})
+    setShowBulkEdit(true)
+  }
+
+  const handleBulkUpdate = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (selectedSpaces.size === 0) return
+
+    try {
+      // Update each selected space
+      const updatePromises = Array.from(selectedSpaces).map(spaceId => {
+        const space = spaces.find(s => s.id === spaceId)
+        if (!space) return Promise.resolve()
+
+        // Merge bulk edit data with existing space data
+        const updatedSpace = { ...space, ...bulkEditData }
+        return api.updateSpace(projectId, spaceId, updatedSpace)
+      })
+
+      await Promise.all(updatePromises)
+
+      setShowBulkEdit(false)
+      setBulkEditData({})
+      setSelectedSpaces(new Set())
+      loadData()
+      alert(`Successfully updated ${selectedSpaces.size} spaces`)
+    } catch (err: any) {
+      alert(err.message)
     }
   }
 
@@ -523,7 +581,12 @@ export default function ProjectDetail() {
                         <div className="mb-4">
                           <p className="text-sm font-medium text-gray-700 mb-2">🎨 3D Preview:</p>
                           <div className="bg-gray-50 rounded-lg p-4">
-                            <OBJViewer objContent={extractionResult.obj_content} width={600} height={400} />
+                            <OBJViewer
+                              objContent={extractionResult.obj_content}
+                              rooms={extractionResult.rooms}
+                              width={600}
+                              height={400}
+                            />
                           </div>
                           <p className="text-xs text-gray-500 mt-2 text-center">
                             Preview your extracted geometry in 3D before applying to project
@@ -553,15 +616,32 @@ export default function ProjectDetail() {
           </div>
 
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">
-              Spaces ({spaces.length})
-            </h2>
-            <button
-              onClick={() => setShowAddSpace(true)}
-              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
-            >
-              ✏️ Add Space Manually
-            </button>
+            <div className="flex items-center space-x-4">
+              <h2 className="text-2xl font-bold text-gray-900">
+                Spaces ({spaces.length})
+              </h2>
+              {selectedSpaces.size > 0 && (
+                <span className="text-sm text-gray-600 bg-indigo-50 px-3 py-1 rounded-full">
+                  {selectedSpaces.size} selected
+                </span>
+              )}
+            </div>
+            <div className="flex space-x-2">
+              {selectedSpaces.size > 0 && (
+                <button
+                  onClick={handleBulkEdit}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm"
+                >
+                  ✏️ Edit Selected ({selectedSpaces.size})
+                </button>
+              )}
+              <button
+                onClick={() => setShowAddSpace(true)}
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
+              >
+                ➕ Add Space Manually
+              </button>
+            </div>
           </div>
 
           {showEditSpace && editingSpace && (
@@ -724,6 +804,104 @@ export default function ProjectDetail() {
                       onClick={() => {
                         setShowEditSpace(false)
                         setEditingSpace(null)
+                      }}
+                      className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {showBulkEdit && (
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
+                <h3 className="text-xl font-bold mb-4">Bulk Edit {selectedSpaces.size} Spaces</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Leave fields empty to keep existing values. Only filled fields will be updated.
+                </p>
+                <form onSubmit={handleBulkUpdate} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Space Type
+                    </label>
+                    <select
+                      value={bulkEditData.space_type || ''}
+                      onChange={(e) => setBulkEditData({
+                        ...bulkEditData,
+                        space_type: e.target.value || undefined
+                      })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    >
+                      <option value="">-- Keep existing --</option>
+                      <option value="office">Office</option>
+                      <option value="office_enclosed">Office (Enclosed)</option>
+                      <option value="office_open">Office (Open Plan)</option>
+                      <option value="conference">Conference Room</option>
+                      <option value="meeting">Meeting Room</option>
+                      <option value="classroom">Classroom</option>
+                      <option value="lobby">Lobby</option>
+                      <option value="corridor">Corridor</option>
+                      <option value="restroom">Restroom</option>
+                      <option value="storage">Storage</option>
+                      <option value="mechanical">Mechanical</option>
+                      <option value="server">Server Room</option>
+                      <option value="cafeteria">Cafeteria</option>
+                      <option value="kitchen">Kitchen</option>
+                      <option value="retail">Retail</option>
+                      <option value="warehouse">Warehouse</option>
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Floor Number
+                      </label>
+                      <input
+                        type="number"
+                        value={bulkEditData.floor_number || ''}
+                        onChange={(e) => setBulkEditData({
+                          ...bulkEditData,
+                          floor_number: e.target.value ? parseInt(e.target.value) : undefined
+                        })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                        placeholder="Keep existing"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Ceiling Height (ft)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={bulkEditData.ceiling_height || ''}
+                        onChange={(e) => setBulkEditData({
+                          ...bulkEditData,
+                          ceiling_height: e.target.value ? parseFloat(e.target.value) : undefined
+                        })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                        placeholder="Keep existing"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex space-x-3">
+                    <button
+                      type="submit"
+                      className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                    >
+                      Update {selectedSpaces.size} Spaces
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowBulkEdit(false)
+                        setBulkEditData({})
                       }}
                       className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
                     >
@@ -915,6 +1093,14 @@ export default function ProjectDetail() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
+                    <th className="px-4 py-3 text-left">
+                      <input
+                        type="checkbox"
+                        checked={selectedSpaces.size === spaces.length && spaces.length > 0}
+                        onChange={toggleSelectAll}
+                        className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                      />
+                    </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Name
                     </th>
@@ -942,28 +1128,59 @@ export default function ProjectDetail() {
                   {spaces.map((space) => (
                     <tr
                       key={space.id}
-                      onClick={() => handleEditSpace(space)}
-                      className="hover:bg-gray-50 cursor-pointer transition-colors"
+                      className="hover:bg-gray-50 transition-colors"
                     >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <input
+                          type="checkbox"
+                          checked={selectedSpaces.has(space.id)}
+                          onChange={(e) => {
+                            e.stopPropagation()
+                            toggleSpaceSelection(space.id)
+                          }}
+                          className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                        />
+                      </td>
+                      <td
+                        className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 cursor-pointer"
+                        onClick={() => handleEditSpace(space)}
+                      >
                         {space.name}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">
+                      <td
+                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize cursor-pointer"
+                        onClick={() => handleEditSpace(space)}
+                      >
                         {space.space_type?.replace(/_/g, ' ') || 'office'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td
+                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 cursor-pointer"
+                        onClick={() => handleEditSpace(space)}
+                      >
                         {space.floor_number}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td
+                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 cursor-pointer"
+                        onClick={() => handleEditSpace(space)}
+                      >
                         {(space.area || 0).toFixed(1)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td
+                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 cursor-pointer"
+                        onClick={() => handleEditSpace(space)}
+                      >
                         {(space.ceiling_height || 0).toFixed(1)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td
+                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 cursor-pointer"
+                        onClick={() => handleEditSpace(space)}
+                      >
                         {space.occupancy || 0}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td
+                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 cursor-pointer"
+                        onClick={() => handleEditSpace(space)}
+                      >
                         {(space.lighting_watts || 0).toFixed(1)}
                       </td>
                     </tr>
