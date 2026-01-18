@@ -41,6 +41,7 @@ export default function ProjectDetail() {
   const [uploadingFloorplan, setUploadingFloorplan] = useState(false)
   const [extracting, setExtracting] = useState(false)
   const [extractionResult, setExtractionResult] = useState<any>(null)
+  const [extractionApplied, setExtractionApplied] = useState(false)
   const [floorplanFile, setFloorplanFile] = useState<File | null>(null)
   const [extractionParams, setExtractionParams] = useState({
     pixels_per_metre: 50,
@@ -158,6 +159,7 @@ export default function ProjectDetail() {
     setFloorplanFile(file)
     setUploadingFloorplan(true)
     setExtracting(true)
+    setExtractionApplied(false) // Reset applied state for new upload
 
     try {
       // Step 1: Upload floorplan
@@ -202,8 +204,9 @@ export default function ProjectDetail() {
 
     try {
       await api.applyGeometryToProject(projectId, extractionResult)
+      // Don't close GEM-AI section - keep geometry visible
       // Don't clear extractionResult - keep geometry visible
-      setShowGemAI(false)
+      setExtractionApplied(true)
       setFloorplanFile(null)
       loadData()
       alert(`Successfully added ${extractionResult.rooms?.length || 0} spaces from floorplan!`)
@@ -595,18 +598,26 @@ export default function ProjectDetail() {
                       )}
 
                       <div className="flex space-x-3">
-                        <button
-                          onClick={handleApplyExtraction}
-                          className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold"
-                        >
-                          ✅ Apply to Project
-                        </button>
-                        <button
-                          onClick={handleCancelExtraction}
-                          className="flex-1 px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-                        >
-                          Cancel
-                        </button>
+                        {!extractionApplied ? (
+                          <>
+                            <button
+                              onClick={handleApplyExtraction}
+                              className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold"
+                            >
+                              ✅ Apply to Project
+                            </button>
+                            <button
+                              onClick={handleCancelExtraction}
+                              className="flex-1 px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        ) : (
+                          <div className="flex-1 px-4 py-3 bg-blue-50 text-blue-800 rounded-lg border-2 border-blue-200 font-semibold text-center">
+                            ✓ Applied to Project - Spaces added to table below
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -883,6 +894,41 @@ export default function ProjectDetail() {
                         onChange={(e) => setBulkEditData({
                           ...bulkEditData,
                           ceiling_height: e.target.value ? parseFloat(e.target.value) : undefined
+                        })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                        placeholder="Keep existing"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Occupancy
+                      </label>
+                      <input
+                        type="number"
+                        value={bulkEditData.occupancy || ''}
+                        onChange={(e) => setBulkEditData({
+                          ...bulkEditData,
+                          occupancy: e.target.value ? parseInt(e.target.value) : undefined
+                        })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                        placeholder="Keep existing"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Lighting (W)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={bulkEditData.lighting_watts || ''}
+                        onChange={(e) => setBulkEditData({
+                          ...bulkEditData,
+                          lighting_watts: e.target.value ? parseFloat(e.target.value) : undefined
                         })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                         placeholder="Keep existing"
