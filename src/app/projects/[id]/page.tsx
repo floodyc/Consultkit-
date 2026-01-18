@@ -26,6 +26,7 @@ export default function ProjectDetail() {
   const [bulkEditData, setBulkEditData] = useState<any>({})
   const [calculating, setCalculating] = useState(false)
   const [calculationResults, setCalculationResults] = useState<any>(null)
+  const [expandedSpaces, setExpandedSpaces] = useState<Set<string>>(new Set())
   const [designStandard, setDesignStandard] = useState<DesignStandard>('ASHRAE_90_1')
   const [newSpace, setNewSpace] = useState({
     name: '',
@@ -139,6 +140,16 @@ export default function ProjectDetail() {
     } finally {
       setCalculating(false)
     }
+  }
+
+  const toggleSpaceExpanded = (spaceId: string) => {
+    const newExpanded = new Set(expandedSpaces)
+    if (newExpanded.has(spaceId)) {
+      newExpanded.delete(spaceId)
+    } else {
+      newExpanded.add(spaceId)
+    }
+    setExpandedSpaces(newExpanded)
   }
 
   // GEM-AI handlers
@@ -1283,47 +1294,173 @@ export default function ProjectDetail() {
                 </div>
               </div>
 
-              {/* Space Results */}
-              <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h3 className="text-lg font-semibold mb-4 text-gray-900">Space Loads</h3>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Space</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Area (m²)</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cooling (W)</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Heating (W)</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cooling W/m²</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Airflow (m³/s)</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {calculationResults.space_results.map((space: any, idx: number) => (
-                        <tr key={idx} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {space.space_name}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {space.floor_area.toFixed(1)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">
-                            {space.peak_cooling_total.toFixed(0)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-medium">
-                            {space.peak_heating.toFixed(0)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {(space.peak_cooling_total / space.floor_area).toFixed(1)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {space.supply_airflow_cooling.toFixed(3)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+              {/* Detailed Space Results */}
+              <div className="space-y-4 mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">Detailed Space Results</h3>
+                {calculationResults.space_results.map((space: any, idx: number) => {
+                  const isExpanded = expandedSpaces.has(space.space_id)
+                  return (
+                    <div key={idx} className="bg-white rounded-lg shadow-md overflow-hidden">
+                      {/* Space Header - Always visible */}
+                      <div
+                        className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                        onClick={() => toggleSpaceExpanded(space.space_id)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <h4 className="text-md font-semibold text-gray-900">{space.space_name}</h4>
+                            <div className="mt-1 grid grid-cols-2 md:grid-cols-6 gap-2 text-sm">
+                              <div>
+                                <span className="text-gray-500">Area:</span>{' '}
+                                <span className="font-medium">{space.floor_area.toFixed(1)} m²</span>
+                              </div>
+                              <div>
+                                <span className="text-gray-500">Cooling:</span>{' '}
+                                <span className="font-medium text-blue-600">{space.peak_cooling_total.toFixed(0)} W</span>
+                              </div>
+                              <div>
+                                <span className="text-gray-500">Heating:</span>{' '}
+                                <span className="font-medium text-red-600">{space.peak_heating.toFixed(0)} W</span>
+                              </div>
+                              <div>
+                                <span className="text-gray-500">W/m²:</span>{' '}
+                                <span className="font-medium">{space.cooling_w_per_m2.toFixed(1)}</span>
+                              </div>
+                              <div>
+                                <span className="text-gray-500">Airflow:</span>{' '}
+                                <span className="font-medium">{space.supply_airflow_cooling.toFixed(3)} m³/s</span>
+                              </div>
+                              <div>
+                                <span className="text-gray-500">CFM:</span>{' '}
+                                <span className="font-medium">{(space.supply_airflow_cooling * 2118.88).toFixed(0)}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="ml-4 text-gray-400">
+                            {isExpanded ? '▼' : '▶'}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Expanded Details */}
+                      {isExpanded && (
+                        <div className="border-t border-gray-200 p-4 bg-gray-50">
+                          {/* Load Breakdown */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Cooling Load Breakdown */}
+                            <div>
+                              <h5 className="font-semibold text-gray-900 mb-3 flex items-center">
+                                <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+                                Cooling Load Breakdown
+                              </h5>
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-600">Sensible:</span>
+                                  <span className="font-medium">{space.peak_cooling_sensible.toFixed(0)} W</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-600">Latent:</span>
+                                  <span className="font-medium">{space.peak_cooling_latent.toFixed(0)} W</span>
+                                </div>
+                                <div className="flex justify-between text-sm font-semibold border-t pt-2">
+                                  <span className="text-gray-900">Total:</span>
+                                  <span className="text-blue-600">{space.peak_cooling_total.toFixed(0)} W</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-600">Tons:</span>
+                                  <span className="font-medium">{(space.peak_cooling_total / 3517).toFixed(2)}</span>
+                                </div>
+                              </div>
+
+                              {/* Load Components */}
+                              {space.components && Object.keys(space.components).length > 0 && (
+                                <div className="mt-4">
+                                  <h6 className="text-sm font-semibold text-gray-700 mb-2">Component Breakdown:</h6>
+                                  <div className="space-y-1">
+                                    {Object.entries(space.components).map(([key, comp]: [string, any]) => (
+                                      <div key={key} className="flex justify-between text-xs">
+                                        <span className="text-gray-600" title={comp.description}>{comp.name}:</span>
+                                        <span className="font-medium">{comp.total_cooling.toFixed(0)} W</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Heating & Other Info */}
+                            <div>
+                              <h5 className="font-semibold text-gray-900 mb-3 flex items-center">
+                                <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
+                                Heating & Ventilation
+                              </h5>
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-600">Peak Heating:</span>
+                                  <span className="font-medium text-red-600">{space.peak_heating.toFixed(0)} W</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-600">Heating W/m²:</span>
+                                  <span className="font-medium">{space.heating_w_per_m2.toFixed(1)}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-600">Heating kW:</span>
+                                  <span className="font-medium">{(space.peak_heating / 1000).toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-600">Outdoor Air:</span>
+                                  <span className="font-medium">{space.outdoor_airflow.toFixed(3)} m³/s</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-600">OA CFM:</span>
+                                  <span className="font-medium">{(space.outdoor_airflow * 2118.88).toFixed(0)}</span>
+                                </div>
+                              </div>
+
+                              {/* Building Envelope */}
+                              <div className="mt-4">
+                                <h6 className="text-sm font-semibold text-gray-700 mb-2">Building Envelope:</h6>
+                                <div className="space-y-1 text-xs">
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-600">Ext. Wall Area:</span>
+                                    <span className="font-medium">{space.exterior_wall_area.toFixed(1)} m²</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-600">Window Area:</span>
+                                    <span className="font-medium">{space.window_area.toFixed(1)} m²</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-600">Roof Area:</span>
+                                    <span className="font-medium">{space.roof_area.toFixed(1)} m²</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-600">Volume:</span>
+                                    <span className="font-medium">{space.volume.toFixed(1)} m³</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Peak Conditions */}
+                              <div className="mt-4">
+                                <h6 className="text-sm font-semibold text-gray-700 mb-2">Peak Conditions:</h6>
+                                <div className="space-y-1 text-xs">
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-600">Peak Hour:</span>
+                                    <span className="font-medium">{space.peak_cooling_hour}:00</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-600">Outdoor Temp:</span>
+                                    <span className="font-medium">{space.outdoor_temp_at_cooling_peak.toFixed(1)} °C</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
 
               {/* Plant Equipment */}

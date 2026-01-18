@@ -35,15 +35,46 @@ class LoadSummary(BaseModel):
     heating_w_per_m2: float
 
 
+class LoadComponentData(BaseModel):
+    name: str
+    sensible_cooling: float = 0.0
+    latent_cooling: float = 0.0
+    total_cooling: float = 0.0
+    sensible_heating: float = 0.0
+    description: str = ""
+
+
 class SpaceResult(BaseModel):
     space_id: str
     space_name: str
     floor_area: float
     volume: float
+
+    # Peak loads
+    peak_cooling_sensible: float
+    peak_cooling_latent: float
     peak_cooling_total: float
     peak_heating: float
+
+    # Intensities
+    cooling_w_per_m2: float
+    heating_w_per_m2: float
+
+    # Building envelope
+    exterior_wall_area: float = 0.0
+    window_area: float = 0.0
+    roof_area: float = 0.0
+
+    # Airflows
     supply_airflow_cooling: float
     outdoor_airflow: float
+
+    # Load components breakdown
+    components: dict[str, LoadComponentData] = {}
+
+    # Peak conditions
+    peak_cooling_hour: int = 15
+    outdoor_temp_at_cooling_peak: float = 35.0
 
 
 class ZoneResult(BaseModel):
@@ -494,19 +525,41 @@ async def run_calculation(
         # current_user["credits"] -= credits_needed
 
         # Convert results to response format
-        space_results = [
-            SpaceResult(
+        space_results = []
+        for sr in results.space_results:
+            # Convert load components
+            components_data = {
+                comp_name: LoadComponentData(
+                    name=comp.name,
+                    sensible_cooling=comp.sensible_cooling,
+                    latent_cooling=comp.latent_cooling,
+                    total_cooling=comp.total_cooling,
+                    sensible_heating=comp.sensible_heating,
+                    description=comp.description,
+                )
+                for comp_name, comp in sr.components.items()
+            }
+
+            space_results.append(SpaceResult(
                 space_id=sr.space_id,
                 space_name=sr.space_name,
                 floor_area=sr.floor_area,
                 volume=sr.volume,
+                peak_cooling_sensible=sr.peak_summary.peak_sensible_cooling,
+                peak_cooling_latent=sr.peak_summary.peak_latent_cooling,
                 peak_cooling_total=sr.peak_summary.peak_total_cooling,
                 peak_heating=sr.peak_summary.peak_sensible_heating,
+                cooling_w_per_m2=sr.peak_summary.cooling_w_per_m2,
+                heating_w_per_m2=sr.peak_summary.heating_w_per_m2,
+                exterior_wall_area=sr.exterior_wall_area,
+                window_area=sr.window_area,
+                roof_area=sr.roof_area,
                 supply_airflow_cooling=sr.supply_airflow_cooling,
                 outdoor_airflow=sr.outdoor_airflow,
-            )
-            for sr in results.space_results
-        ]
+                components=components_data,
+                peak_cooling_hour=sr.peak_summary.peak_cooling_hour,
+                outdoor_temp_at_cooling_peak=sr.peak_summary.outdoor_temp_at_cooling_peak,
+            ))
 
         zone_results = [
             ZoneResult(
