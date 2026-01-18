@@ -375,13 +375,21 @@ async def apply_extraction_to_project(
     # Create spaces from extracted rooms
     spaces = []
     for room in extraction_result.rooms:
+        # Convert metric to imperial for frontend display
+        area_sqft = room.area_m2 * 10.764  # m² to sq ft
+        height_ft = room.height * 3.28084  # m to ft
+
         space = {
             "id": room.id,
             "name": room.name,
             "space_type": "office_enclosed",
-            "floor_area": room.area_m2,
+            "floor_number": 1,  # Default floor number
+            "area": area_sqft,  # Frontend expects 'area' in sq ft
+            "floor_area": room.area_m2,  # Keep metric for calculations
             "volume": room.volume_m3,
-            "height": room.height,
+            "height": room.height,  # Keep metric for calculations
+            "ceiling_height": height_ft,  # Frontend expects 'ceiling_height' in ft
+            "occupancy": 0,  # Default occupancy
             "x": room.x,
             "y": room.y,
             "z": room.z,
@@ -390,6 +398,7 @@ async def apply_extraction_to_project(
             "cooling_setpoint": 24.0,
             "heating_setpoint": 21.0,
             "lighting_power_density": 10.0,
+            "lighting_watts": 0.0,
             "equipment_power_density": 10.0,
         }
         spaces.append(space)

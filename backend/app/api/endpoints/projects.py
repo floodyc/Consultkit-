@@ -55,13 +55,32 @@ class SpaceData(BaseModel):
     id: str
     name: str
     space_type: str
-    floor_area: float
+    floor_number: int = 1
+    area: float  # Square footage or area
+    floor_area: float  # Alias for area (for compatibility)
     volume: float
-    height: float
+    height: float  # Ceiling height in feet or meters
+    ceiling_height: float  # Alias for height (for compatibility)
+    occupancy: int = 0
     cooling_setpoint: float = 24.0
     heating_setpoint: float = 21.0
     lighting_power_density: float = 10.0
+    lighting_watts: float = 0.0
     equipment_power_density: float = 10.0
+
+    def __init__(self, **data):
+        # Handle field aliases
+        if 'area' in data and 'floor_area' not in data:
+            data['floor_area'] = data['area']
+        elif 'floor_area' in data and 'area' not in data:
+            data['area'] = data['floor_area']
+
+        if 'height' in data and 'ceiling_height' not in data:
+            data['ceiling_height'] = data['height']
+        elif 'ceiling_height' in data and 'height' not in data:
+            data['height'] = data['ceiling_height']
+
+        super().__init__(**data)
 
 
 class ProjectResponse(BaseModel):
