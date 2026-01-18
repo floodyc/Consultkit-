@@ -9,6 +9,7 @@ from .geometry_extractor import (
     DetectedRoom,
 )
 from .gbxml_writer import GbXMLWriter
+from .obj_writer import OBJWriter
 
 __all__ = [
     "GeometryExtractor",
@@ -17,4 +18,5 @@ __all__ = [
     "DetectedOpening",
     "DetectedRoom",
     "GbXMLWriter",
+    "OBJWriter",
 ]
