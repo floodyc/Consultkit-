@@ -15,7 +15,7 @@ export default function OBJViewer({ objContent, width = 600, height = 400 }: OBJ
   const sceneRef = useRef<THREE.Scene | null>(null)
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null)
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null)
-  const meshRef = useRef<THREE.Group | null>(null)
+  const meshRef = useRef<THREE.Mesh | null>(null)
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -110,8 +110,7 @@ export default function OBJViewer({ objContent, width = 600, height = 400 }: OBJ
     })
 
     scene.add(mesh)
-    meshRef.current = new THREE.Group()
-    meshRef.current.add(mesh)
+    meshRef.current = mesh
 
     // Add wireframe overlay
     const wireframe = new THREE.LineSegments(
