@@ -143,6 +143,32 @@ export class APIClient {
     return this.request(`/api/v1/projects/${projectId}/spaces`)
   }
 
+  async updateSpace(projectId: string, spaceId: string, data: any) {
+    // Transform frontend data to match backend SpaceData model
+    const spaceData = {
+      id: spaceId,
+      name: data.name,
+      space_type: data.space_type || 'office',
+      floor_number: data.floor_number,
+      floor_area: data.area,
+      area: data.area,
+      volume: data.area * data.ceiling_height,
+      height: data.ceiling_height,
+      ceiling_height: data.ceiling_height,
+      occupancy: data.occupancy || 0,
+      lighting_watts: data.lighting_watts || 0,
+      cooling_setpoint: data.cooling_setpoint || 24.0,
+      heating_setpoint: data.heating_setpoint || 21.0,
+      lighting_power_density: data.lighting_watts / data.area || 10.0,
+      equipment_power_density: 10.0,
+    }
+
+    return this.request(`/api/v1/projects/${projectId}/spaces/${spaceId}`, {
+      method: 'PUT',
+      body: JSON.stringify(spaceData),
+    })
+  }
+
   // Calculations
   async runCalculation(projectId: string, data: any) {
     return this.request(`/api/v1/calculations/${projectId}/run`, {

@@ -427,3 +427,55 @@ async def add_space(
     project["total_floor_area"] = sum(s["floor_area"] for s in project["spaces"])
 
     return space_data
+
+
+@router.put("/{project_id}/spaces/{space_id}", response_model=SpaceData)
+async def update_space(
+    project_id: str,
+    space_id: str,
+    space_data: SpaceData,
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Update a space in a project.
+    """
+    project = _projects_store.get(project_id)
+
+    if not project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found",
+        )
+
+    if project.get("user_id") != current_user["id"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to modify this project",
+        )
+
+    if "spaces" not in project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Space not found",
+        )
+
+    # Find and update the space
+    space_found = False
+    for i, space in enumerate(project["spaces"]):
+        if space["id"] == space_id:
+            project["spaces"][i] = space_data.model_dump()
+            space_found = True
+            break
+
+    if not space_found:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Space not found",
+        )
+
+    project["updated_at"] = datetime.utcnow()
+
+    # Update total floor area
+    project["total_floor_area"] = sum(s["floor_area"] for s in project["spaces"])
+
+    return space_data
