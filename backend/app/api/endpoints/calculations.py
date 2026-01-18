@@ -27,6 +27,8 @@ class CalculationRequest(BaseModel):
 
 
 class LoadSummary(BaseModel):
+    total_floor_area: float = 0.0
+    total_volume: float = 0.0
     peak_cooling_sensible: float
     peak_cooling_latent: float
     peak_cooling_total: float
@@ -614,6 +616,8 @@ async def run_calculation(
             calculated_at=datetime.utcnow(),
             total_floor_area=results.total_floor_area,
             building_summary=LoadSummary(
+                total_floor_area=results.total_floor_area,
+                total_volume=results.total_volume,
                 peak_cooling_sensible=sum(sr.peak_summary.peak_sensible_cooling for sr in results.space_results),
                 peak_cooling_latent=sum(sr.peak_summary.peak_latent_cooling for sr in results.space_results),
                 peak_cooling_total=results.total_cooling_load,
