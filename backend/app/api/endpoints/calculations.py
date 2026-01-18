@@ -410,6 +410,11 @@ async def run_calculation(
     warnings = []
 
     try:
+        print(f"\n{'='*80}")
+        print(f"🔥 STARTING CALCULATION for project: {project.get('name')}")
+        print(f"Number of spaces: {len(project.get('spaces', []))}")
+        print(f"{'='*80}\n")
+
         # Build calculation model
         weather = WeatherData(
             name="Design Conditions",
@@ -439,7 +444,13 @@ async def run_calculation(
         # Convert project spaces to calculation model with complete building envelope
         calc_spaces = []
         for s in project.get("spaces", []):
+            print(f"📐 Building space: {s.get('name')}")
+            print(f"   - Area: {s.get('area', s.get('floor_area', 0))} sq ft")
+            print(f"   - Occupancy: {s.get('occupancy', 0)}")
+            print(f"   - Lighting: {s.get('lighting_watts', 0)} W")
             space = build_space_for_calculation(s)
+            print(f"   - Created {len(space.surfaces)} surfaces")
+            print(f"   - Floor area: {space.floor_area:.1f} m²")
             calc_spaces.append(space)
 
         building = Building(
@@ -458,8 +469,21 @@ async def run_calculation(
         )
 
         # Run calculation
+        print(f"\n🧮 Running ASHRAE Heat Balance Calculator...")
         calculator = ASHRAELoadCalculator()
         results = calculator.calculate_project(calc_project)
+
+        print(f"\n✅ CALCULATION COMPLETE!")
+        print(f"Total cooling load: {results.total_cooling_load:.1f} W")
+        print(f"Total heating load: {results.total_heating_load:.1f} W")
+        print(f"Number of space results: {len(results.space_results)}")
+        for sr in results.space_results:
+            print(f"\n  Space: {sr.space_name}")
+            print(f"    - Peak cooling: {sr.peak_summary.peak_total_cooling:.1f} W")
+            print(f"    - Peak heating: {sr.peak_summary.peak_sensible_heating:.1f} W")
+            print(f"    - Cooling W/m²: {sr.peak_summary.cooling_w_per_m2:.1f}")
+            print(f"    - Supply airflow: {sr.supply_airflow_cooling:.3f} m³/s")
+        print(f"{'='*80}\n")
 
         # Update project status
         project["status"] = "completed"
@@ -550,6 +574,12 @@ async def run_calculation(
         )
 
     except Exception as e:
+        print(f"\n❌ CALCULATION ERROR!")
+        print(f"Error type: {type(e).__name__}")
+        print(f"Error message: {str(e)}")
+        import traceback
+        print(f"Traceback:\n{traceback.format_exc()}")
+        print(f"{'='*80}\n")
         project["status"] = "error"
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
