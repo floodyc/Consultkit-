@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { api } from '@/lib/api'
+import { applySpaceTypeDefaults, type DesignStandard } from '@/lib/spaceTypeDefaults'
 import dynamic from 'next/dynamic'
 
 // Dynamically import OBJViewer to avoid SSR issues with Three.js
@@ -21,6 +22,7 @@ export default function ProjectDetail() {
   const [showEditSpace, setShowEditSpace] = useState(false)
   const [editingSpace, setEditingSpace] = useState<any>(null)
   const [calculating, setCalculating] = useState(false)
+  const [designStandard, setDesignStandard] = useState<DesignStandard>('ASHRAE_90_1')
   const [newSpace, setNewSpace] = useState({
     name: '',
     floor_number: 1,
@@ -55,10 +57,22 @@ export default function ProjectDetail() {
       ])
       setProject(projectData)
       setSpaces(spacesData)
+      // Load design standard from project (default to ASHRAE 90.1)
+      setDesignStandard(projectData.design_standard || 'ASHRAE_90_1')
     } catch (err) {
       router.push('/dashboard')
     } finally {
       setLoading(false)
+    }
+  }
+
+  // Apply defaults when space type changes
+  const applyDefaultsForSpaceType = (spaceType: string, area: number, currentSpace: any) => {
+    const defaults = applySpaceTypeDefaults(spaceType, area, designStandard)
+    return {
+      ...currentSpace,
+      space_type: spaceType,
+      ...defaults,
     }
   }
 
@@ -265,7 +279,20 @@ export default function ProjectDetail() {
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h3 className="text-lg font-semibold mb-2">Project Details</h3>
+            <div className="flex justify-between items-start mb-4">
+              <h3 className="text-lg font-semibold">Project Details</h3>
+              <div className="flex items-center space-x-2">
+                <label className="text-sm font-medium text-gray-700">Design Standard:</label>
+                <select
+                  value={designStandard}
+                  onChange={(e) => setDesignStandard(e.target.value as DesignStandard)}
+                  className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="ASHRAE_90_1">ASHRAE 90.1-2019</option>
+                  <option value="NECB_2020">NECB 2020</option>
+                </select>
+              </div>
+            </div>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-gray-600">Location:</span>{' '}
@@ -285,6 +312,11 @@ export default function ProjectDetail() {
                   {project?.description || 'No description'}
                 </span>
               </div>
+            </div>
+            <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+              <p className="text-xs text-blue-800">
+                <strong>💡 Design Standard:</strong> {designStandard === 'ASHRAE_90_1' ? 'ASHRAE 90.1-2019' : 'NECB 2020'} defaults will be applied to new spaces (occupancy, lighting, equipment loads). You can override these values for any space.
+              </p>
             </div>
           </div>
 
@@ -556,12 +588,15 @@ export default function ProjectDetail() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Space Type *
+                      <span className="text-xs text-gray-500 ml-2">(auto-fills defaults)</span>
                     </label>
                     <select
                       required
                       value={editingSpace.space_type || 'office'}
                       onChange={(e) =>
-                        setEditingSpace({ ...editingSpace, space_type: e.target.value })
+                        setEditingSpace(
+                          applyDefaultsForSpaceType(e.target.value, editingSpace.area, editingSpace)
+                        )
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                     >
@@ -611,12 +646,12 @@ export default function ProjectDetail() {
                         type="number"
                         required
                         value={editingSpace.area}
-                        onChange={(e) =>
-                          setEditingSpace({
-                            ...editingSpace,
-                            area: parseFloat(e.target.value),
-                          })
-                        }
+                        onChange={(e) => {
+                          const newArea = parseFloat(e.target.value) || 0
+                          setEditingSpace(
+                            applyDefaultsForSpaceType(editingSpace.space_type, newArea, editingSpace)
+                          )
+                        }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                       />
                     </div>
@@ -724,12 +759,15 @@ export default function ProjectDetail() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Space Type *
+                      <span className="text-xs text-gray-500 ml-2">(auto-fills defaults)</span>
                     </label>
                     <select
                       required
                       value={newSpace.space_type || 'office'}
                       onChange={(e) =>
-                        setNewSpace({ ...newSpace, space_type: e.target.value })
+                        setNewSpace(
+                          applyDefaultsForSpaceType(e.target.value, newSpace.area, newSpace)
+                        )
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                     >
@@ -779,12 +817,12 @@ export default function ProjectDetail() {
                         type="number"
                         required
                         value={newSpace.area}
-                        onChange={(e) =>
-                          setNewSpace({
-                            ...newSpace,
-                            area: parseFloat(e.target.value),
-                          })
-                        }
+                        onChange={(e) => {
+                          const newArea = parseFloat(e.target.value) || 0
+                          setNewSpace(
+                            applyDefaultsForSpaceType(newSpace.space_type, newArea, newSpace)
+                          )
+                        }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                       />
                     </div>
