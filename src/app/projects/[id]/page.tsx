@@ -286,6 +286,80 @@ export default function ProjectDetail() {
 
             {showGemAI && (
               <div className="mt-4 space-y-4">
+                {/* Extraction Parameters */}
+                <div className="bg-white rounded-lg p-4 border border-indigo-200">
+                  <h4 className="font-semibold text-gray-900 mb-3">⚙️ Extraction Settings</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Scale (pixels per meter) *
+                      </label>
+                      <input
+                        type="number"
+                        value={extractionParams.pixels_per_metre}
+                        onChange={(e) => setExtractionParams({
+                          ...extractionParams,
+                          pixels_per_metre: parseFloat(e.target.value) || 50
+                        })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                        min="1"
+                        step="1"
+                        disabled={uploadingFloorplan || extracting}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        How many pixels = 1 meter in your drawing
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Floor Height (m)
+                      </label>
+                      <input
+                        type="number"
+                        value={extractionParams.floor_height_m}
+                        onChange={(e) => setExtractionParams({
+                          ...extractionParams,
+                          floor_height_m: parseFloat(e.target.value) || 3.0
+                        })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                        min="2"
+                        max="10"
+                        step="0.1"
+                        disabled={uploadingFloorplan || extracting}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Ceiling height for volume calculation
+                      </p>
+                    </div>
+                    <div>
+                      <label className="flex items-center space-x-2 pt-7">
+                        <input
+                          type="checkbox"
+                          checked={extractionParams.detect_openings}
+                          onChange={(e) => setExtractionParams({
+                            ...extractionParams,
+                            detect_openings: e.target.checked
+                          })}
+                          className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                          disabled={uploadingFloorplan || extracting}
+                        />
+                        <span className="text-sm font-medium text-gray-700">
+                          Detect doors/windows
+                        </span>
+                      </label>
+                      <p className="text-xs text-gray-500 mt-1 ml-6">
+                        Experimental feature
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                      💡 <strong>Tip:</strong> To find your scale, measure a known distance in your drawing (e.g., a 5m wall)
+                      and count the pixels, then divide pixels by meters (e.g., 250px ÷ 5m = 50 pixels/meter).
+                    </p>
+                  </div>
+                </div>
+
                 <input
                   ref={fileInputRef}
                   type="file"
