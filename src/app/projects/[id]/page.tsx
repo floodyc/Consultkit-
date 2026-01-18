@@ -25,6 +25,7 @@ export default function ProjectDetail() {
   const [selectedSpaces, setSelectedSpaces] = useState<Set<string>>(new Set())
   const [bulkEditData, setBulkEditData] = useState<any>({})
   const [calculating, setCalculating] = useState(false)
+  const [calculationResults, setCalculationResults] = useState<any>(null)
   const [designStandard, setDesignStandard] = useState<DesignStandard>('ASHRAE_90_1')
   const [newSpace, setNewSpace] = useState({
     name: '',
@@ -129,9 +130,11 @@ export default function ProjectDetail() {
         design_temp_summer: 95,
         design_temp_winter: 5,
       })
-      alert('Calculation completed! Check your results.')
-      // In a real app, navigate to results page
+      console.log('✅ Calculation results received:', result)
+      setCalculationResults(result)
+      alert(`Calculation completed!\n\nTotal Cooling: ${result.building_summary.peak_cooling_total.toFixed(0)} W\nTotal Heating: ${result.building_summary.peak_heating.toFixed(0)} W\n\nScroll down to see detailed results.`)
     } catch (err: any) {
+      console.error('❌ Calculation error:', err)
       alert(err.message)
     } finally {
       setCalculating(false)
@@ -1233,6 +1236,127 @@ export default function ProjectDetail() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {/* Calculation Results */}
+          {calculationResults && (
+            <div className="mt-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                📊 Calculation Results
+              </h2>
+
+              {/* Building Summary */}
+              <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h3 className="text-lg font-semibold mb-4 text-gray-900">Building Summary</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <div className="text-sm text-blue-600 font-medium">Total Cooling Load</div>
+                    <div className="text-2xl font-bold text-blue-900">
+                      {calculationResults.building_summary.peak_cooling_total.toFixed(0)} W
+                    </div>
+                    <div className="text-xs text-blue-600">
+                      {(calculationResults.building_summary.peak_cooling_total / 3517).toFixed(1)} tons
+                    </div>
+                  </div>
+                  <div className="bg-red-50 p-4 rounded-lg">
+                    <div className="text-sm text-red-600 font-medium">Total Heating Load</div>
+                    <div className="text-2xl font-bold text-red-900">
+                      {calculationResults.building_summary.peak_heating.toFixed(0)} W
+                    </div>
+                    <div className="text-xs text-red-600">
+                      {(calculationResults.building_summary.peak_heating / 1000).toFixed(1)} kW
+                    </div>
+                  </div>
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <div className="text-sm text-green-600 font-medium">Cooling Intensity</div>
+                    <div className="text-2xl font-bold text-green-900">
+                      {calculationResults.building_summary.cooling_w_per_m2.toFixed(1)} W/m²
+                    </div>
+                  </div>
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <div className="text-sm text-orange-600 font-medium">Heating Intensity</div>
+                    <div className="text-2xl font-bold text-orange-900">
+                      {calculationResults.building_summary.heating_w_per_m2.toFixed(1)} W/m²
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Space Results */}
+              <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h3 className="text-lg font-semibold mb-4 text-gray-900">Space Loads</h3>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Space</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Area (m²)</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cooling (W)</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Heating (W)</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cooling W/m²</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Airflow (m³/s)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {calculationResults.space_results.map((space: any, idx: number) => (
+                        <tr key={idx} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {space.space_name}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {space.floor_area.toFixed(1)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">
+                            {space.peak_cooling_total.toFixed(0)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-medium">
+                            {space.peak_heating.toFixed(0)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {(space.peak_cooling_total / space.floor_area).toFixed(1)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {space.supply_airflow_cooling.toFixed(3)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Plant Equipment */}
+              {calculationResults.plant_results && calculationResults.plant_results.length > 0 && (
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <h3 className="text-lg font-semibold mb-4 text-gray-900">Plant Equipment</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {calculationResults.plant_results.map((plant: any, idx: number) => (
+                      <div key={idx} className="border border-gray-200 rounded-lg p-4">
+                        <h4 className="font-medium text-gray-900 mb-3">{plant.plant_name}</h4>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Chiller Capacity:</span>
+                            <span className="font-medium">{plant.chiller_capacity_tons.toFixed(1)} tons</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Number of Chillers:</span>
+                            <span className="font-medium">{plant.num_chillers}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Boiler Capacity:</span>
+                            <span className="font-medium">{plant.boiler_capacity_kw.toFixed(1)} kW</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Number of Boilers:</span>
+                            <span className="font-medium">{plant.num_boilers}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
