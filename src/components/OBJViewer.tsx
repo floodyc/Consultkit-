@@ -41,17 +41,37 @@ export default function OBJViewer({ objContent, width = 600, height = 400 }: OBJ
     rendererRef.current = renderer
 
     // Parse OBJ content first to get geometry size
+    console.log('[OBJViewer] OBJ content length:', objContent.length)
+    console.log('[OBJViewer] OBJ content preview:', objContent.substring(0, 500))
+
     const geometry = parseOBJ(objContent)
+    console.log('[OBJViewer] Parsed geometry:', {
+      vertexCount: geometry.attributes.position?.count || 0,
+      indexCount: geometry.index?.count || 0,
+      hasPosition: !!geometry.attributes.position,
+      hasIndex: !!geometry.index,
+    })
 
     // Calculate bounding box for proper scaling
     geometry.computeBoundingBox()
     const boundingBox = geometry.boundingBox!
+    console.log('[OBJViewer] Bounding box:', {
+      min: boundingBox.min,
+      max: boundingBox.max,
+    })
+
     const center = new THREE.Vector3()
     boundingBox.getCenter(center)
 
     const size = new THREE.Vector3()
     boundingBox.getSize(size)
     const maxDim = Math.max(size.x, size.y, size.z)
+
+    console.log('[OBJViewer] Geometry info:', {
+      center: center,
+      size: size,
+      maxDim: maxDim,
+    })
 
     // Lighting
     const ambientLight = new THREE.AmbientLight(0x404040, 2)
@@ -81,6 +101,14 @@ export default function OBJViewer({ objContent, width = 600, height = 400 }: OBJ
     })
 
     const mesh = new THREE.Mesh(geometry, material)
+    mesh.castShadow = true
+    mesh.receiveShadow = true
+    console.log('[OBJViewer] Created mesh:', {
+      visible: mesh.visible,
+      position: mesh.position,
+      geometryVertices: geometry.attributes.position?.count,
+    })
+
     scene.add(mesh)
     meshRef.current = new THREE.Group()
     meshRef.current.add(mesh)
@@ -91,6 +119,7 @@ export default function OBJViewer({ objContent, width = 600, height = 400 }: OBJ
       new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1 })
     )
     mesh.add(wireframe)
+    console.log('[OBJViewer] Added wireframe, total children:', mesh.children.length)
 
     // Position camera much closer to fill the viewport
     const distance = maxDim * 1.2
