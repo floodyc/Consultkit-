@@ -49,6 +49,8 @@ class ExtractionResult(BaseModel):
     image_height_px: int
     pixels_per_metre: float
     debug_images: dict[str, str]  # Base64 encoded
+    gbxml_content: str  # gbXML file content
+    obj_content: str  # Wavefront OBJ file content for 3D preview
 
 
 class UploadResponse(BaseModel):
@@ -218,6 +220,23 @@ async def extract_geometry(
         ]
 
         logger.info(f"Building response with {len(rooms)} rooms")
+
+        # Generate gbXML for data export
+        logger.info("Generating gbXML...")
+        from gem_ai import GbXMLWriter
+        gbxml_writer = GbXMLWriter(building_name=project_id)
+        gbxml_writer.from_extracted_geometry(geometry)
+        gbxml_content = gbxml_writer.generate()
+        logger.info(f"Generated gbXML: {len(gbxml_content)} characters")
+
+        # Generate OBJ for 3D visualization
+        logger.info("Generating OBJ...")
+        from gem_ai import OBJWriter
+        obj_writer = OBJWriter()
+        obj_writer.from_extracted_geometry(geometry)
+        obj_content = obj_writer.generate()
+        logger.info(f"Generated OBJ: {len(obj_content)} characters, {len(obj_writer.vertices)} vertices")
+
         return ExtractionResult(
             file_id=file_id,
             filename=os.path.basename(file_path),
@@ -229,6 +248,8 @@ async def extract_geometry(
             image_height_px=geometry.image_height_px,
             pixels_per_metre=geometry.pixels_per_metre,
             debug_images=geometry.debug_images,
+            gbxml_content=gbxml_content,
+            obj_content=obj_content,
         )
 
     except Exception as e:
