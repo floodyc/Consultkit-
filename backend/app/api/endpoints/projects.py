@@ -55,13 +55,32 @@ class SpaceData(BaseModel):
     id: str
     name: str
     space_type: str
-    floor_area: float
+    floor_number: int = 1
+    area: float  # Square footage or area
+    floor_area: float  # Alias for area (for compatibility)
     volume: float
-    height: float
+    height: float  # Ceiling height in feet or meters
+    ceiling_height: float  # Alias for height (for compatibility)
+    occupancy: int = 0
     cooling_setpoint: float = 24.0
     heating_setpoint: float = 21.0
     lighting_power_density: float = 10.0
+    lighting_watts: float = 0.0
     equipment_power_density: float = 10.0
+
+    def __init__(self, **data):
+        # Handle field aliases
+        if 'area' in data and 'floor_area' not in data:
+            data['floor_area'] = data['area']
+        elif 'floor_area' in data and 'area' not in data:
+            data['area'] = data['floor_area']
+
+        if 'height' in data and 'ceiling_height' not in data:
+            data['ceiling_height'] = data['height']
+        elif 'ceiling_height' in data and 'height' not in data:
+            data['height'] = data['ceiling_height']
+
+        super().__init__(**data)
 
 
 class ProjectResponse(BaseModel):
@@ -402,6 +421,58 @@ async def add_space(
         project["spaces"] = []
 
     project["spaces"].append(space_data.model_dump())
+    project["updated_at"] = datetime.utcnow()
+
+    # Update total floor area
+    project["total_floor_area"] = sum(s["floor_area"] for s in project["spaces"])
+
+    return space_data
+
+
+@router.put("/{project_id}/spaces/{space_id}", response_model=SpaceData)
+async def update_space(
+    project_id: str,
+    space_id: str,
+    space_data: SpaceData,
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Update a space in a project.
+    """
+    project = _projects_store.get(project_id)
+
+    if not project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found",
+        )
+
+    if project.get("user_id") != current_user["id"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to modify this project",
+        )
+
+    if "spaces" not in project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Space not found",
+        )
+
+    # Find and update the space
+    space_found = False
+    for i, space in enumerate(project["spaces"]):
+        if space["id"] == space_id:
+            project["spaces"][i] = space_data.model_dump()
+            space_found = True
+            break
+
+    if not space_found:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Space not found",
+        )
+
     project["updated_at"] = datetime.utcnow()
 
     # Update total floor area

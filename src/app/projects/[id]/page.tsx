@@ -18,6 +18,8 @@ export default function ProjectDetail() {
   const [spaces, setSpaces] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showAddSpace, setShowAddSpace] = useState(false)
+  const [showEditSpace, setShowEditSpace] = useState(false)
+  const [editingSpace, setEditingSpace] = useState<any>(null)
   const [calculating, setCalculating] = useState(false)
   const [newSpace, setNewSpace] = useState({
     name: '',
@@ -26,6 +28,7 @@ export default function ProjectDetail() {
     ceiling_height: 9,
     occupancy: 0,
     lighting_watts: 0,
+    space_type: 'office',
   })
 
   // GEM-AI state
@@ -71,7 +74,25 @@ export default function ProjectDetail() {
         ceiling_height: 9,
         occupancy: 0,
         lighting_watts: 0,
+        space_type: 'office',
       })
+      loadData()
+    } catch (err: any) {
+      alert(err.message)
+    }
+  }
+
+  const handleEditSpace = (space: any) => {
+    setEditingSpace({ ...space })
+    setShowEditSpace(true)
+  }
+
+  const handleUpdateSpace = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      await api.updateSpace(projectId, editingSpace.id, editingSpace)
+      setShowEditSpace(false)
+      setEditingSpace(null)
       loadData()
     } catch (err: any) {
       alert(err.message)
@@ -511,6 +532,174 @@ export default function ProjectDetail() {
             </button>
           </div>
 
+          {showEditSpace && editingSpace && (
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
+                <h3 className="text-xl font-bold mb-4">Edit Space: {editingSpace.name}</h3>
+                <form onSubmit={handleUpdateSpace} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Room Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={editingSpace.name}
+                      onChange={(e) =>
+                        setEditingSpace({ ...editingSpace, name: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      placeholder="Conference Room A"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Space Type *
+                    </label>
+                    <select
+                      required
+                      value={editingSpace.space_type || 'office'}
+                      onChange={(e) =>
+                        setEditingSpace({ ...editingSpace, space_type: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    >
+                      <option value="office">Office</option>
+                      <option value="office_enclosed">Office (Enclosed)</option>
+                      <option value="office_open">Office (Open Plan)</option>
+                      <option value="conference">Conference Room</option>
+                      <option value="meeting">Meeting Room</option>
+                      <option value="classroom">Classroom</option>
+                      <option value="lobby">Lobby</option>
+                      <option value="corridor">Corridor</option>
+                      <option value="restroom">Restroom</option>
+                      <option value="storage">Storage</option>
+                      <option value="mechanical">Mechanical</option>
+                      <option value="server">Server Room</option>
+                      <option value="cafeteria">Cafeteria</option>
+                      <option value="kitchen">Kitchen</option>
+                      <option value="retail">Retail</option>
+                      <option value="warehouse">Warehouse</option>
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Floor Number *
+                      </label>
+                      <input
+                        type="number"
+                        required
+                        value={editingSpace.floor_number}
+                        onChange={(e) =>
+                          setEditingSpace({
+                            ...editingSpace,
+                            floor_number: parseInt(e.target.value),
+                          })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Area (sq ft) *
+                      </label>
+                      <input
+                        type="number"
+                        required
+                        value={editingSpace.area}
+                        onChange={(e) =>
+                          setEditingSpace({
+                            ...editingSpace,
+                            area: parseFloat(e.target.value),
+                          })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Ceiling Height (ft) *
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      required
+                      value={editingSpace.ceiling_height}
+                      onChange={(e) =>
+                        setEditingSpace({
+                          ...editingSpace,
+                          ceiling_height: parseFloat(e.target.value),
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Occupancy
+                      </label>
+                      <input
+                        type="number"
+                        value={editingSpace.occupancy}
+                        onChange={(e) =>
+                          setEditingSpace({
+                            ...editingSpace,
+                            occupancy: parseInt(e.target.value),
+                          })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Lighting (W)
+                      </label>
+                      <input
+                        type="number"
+                        value={editingSpace.lighting_watts}
+                        onChange={(e) =>
+                          setEditingSpace({
+                            ...editingSpace,
+                            lighting_watts: parseFloat(e.target.value),
+                          })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex space-x-3">
+                    <button
+                      type="submit"
+                      className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                    >
+                      Save Changes
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowEditSpace(false)
+                        setEditingSpace(null)
+                      }}
+                      className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
           {showAddSpace && (
             <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
               <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
@@ -530,6 +719,37 @@ export default function ProjectDetail() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                       placeholder="Conference Room A"
                     />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Space Type *
+                    </label>
+                    <select
+                      required
+                      value={newSpace.space_type || 'office'}
+                      onChange={(e) =>
+                        setNewSpace({ ...newSpace, space_type: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    >
+                      <option value="office">Office</option>
+                      <option value="office_enclosed">Office (Enclosed)</option>
+                      <option value="office_open">Office (Open Plan)</option>
+                      <option value="conference">Conference Room</option>
+                      <option value="meeting">Meeting Room</option>
+                      <option value="classroom">Classroom</option>
+                      <option value="lobby">Lobby</option>
+                      <option value="corridor">Corridor</option>
+                      <option value="restroom">Restroom</option>
+                      <option value="storage">Storage</option>
+                      <option value="mechanical">Mechanical</option>
+                      <option value="server">Server Room</option>
+                      <option value="cafeteria">Cafeteria</option>
+                      <option value="kitchen">Kitchen</option>
+                      <option value="retail">Retail</option>
+                      <option value="warehouse">Warehouse</option>
+                    </select>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
@@ -661,6 +881,9 @@ export default function ProjectDetail() {
                       Name
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Type
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Floor
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -672,25 +895,38 @@ export default function ProjectDetail() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Occupancy
                     </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Lighting (W)
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {spaces.map((space) => (
-                    <tr key={space.id}>
+                    <tr
+                      key={space.id}
+                      onClick={() => handleEditSpace(space)}
+                      className="hover:bg-gray-50 cursor-pointer transition-colors"
+                    >
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {space.name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">
+                        {space.space_type?.replace(/_/g, ' ') || 'office'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {space.floor_number}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {space.area}
+                        {(space.area || 0).toFixed(1)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {space.ceiling_height}
+                        {(space.ceiling_height || 0).toFixed(1)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {space.occupancy}
+                        {space.occupancy || 0}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {(space.lighting_watts || 0).toFixed(1)}
                       </td>
                     </tr>
                   ))}

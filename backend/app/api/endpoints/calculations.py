@@ -18,6 +18,8 @@ router = APIRouter()
 
 # Pydantic models
 class CalculationRequest(BaseModel):
+    design_temp_summer: Optional[float] = 95.0
+    design_temp_winter: Optional[float] = 5.0
     include_hourly_profiles: bool = True
     apply_safety_factors: bool = True
     cooling_safety_factor: float = 1.1
