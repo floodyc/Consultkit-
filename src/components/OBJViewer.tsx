@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
 interface OBJViewerProps {
   objContent: string
@@ -91,24 +92,33 @@ export default function OBJViewer({ objContent, width = 600, height = 400 }: OBJ
     )
     mesh.add(wireframe)
 
-    // Position camera closer to see the model better
-    const distance = maxDim * 1.8
+    // Position camera much closer to fill the viewport
+    const distance = maxDim * 1.2
     camera.position.set(
-      center.x + distance * 0.7,
-      center.y + distance * 0.7,
-      center.z + distance * 0.7
+      center.x + distance * 0.6,
+      center.y + distance * 0.8,
+      center.z + distance * 0.6
     )
     camera.lookAt(center)
+
+    // Add orbit controls for interactive viewing
+    const controls = new OrbitControls(camera, renderer.domElement)
+    controls.target.copy(center)
+    controls.enableDamping = true
+    controls.dampingFactor = 0.05
+    controls.screenSpacePanning = false
+    controls.minDistance = maxDim * 0.5
+    controls.maxDistance = maxDim * 5
+    controls.maxPolarAngle = Math.PI / 2 // Don't go below ground
+    controls.update()
 
     // Animation loop
     let animationId: number
     const animate = () => {
       animationId = requestAnimationFrame(animate)
 
-      // Slow rotation for better viewing
-      if (meshRef.current) {
-        meshRef.current.rotation.y += 0.005
-      }
+      // Update controls for smooth damping
+      controls.update()
 
       renderer.render(scene, camera)
     }
@@ -117,6 +127,7 @@ export default function OBJViewer({ objContent, width = 600, height = 400 }: OBJ
     // Cleanup
     return () => {
       cancelAnimationFrame(animationId)
+      controls.dispose()
       renderer.dispose()
       if (containerRef.current?.contains(renderer.domElement)) {
         containerRef.current.removeChild(renderer.domElement)
@@ -131,8 +142,11 @@ export default function OBJViewer({ objContent, width = 600, height = 400 }: OBJ
         className="border border-gray-300 rounded-lg overflow-hidden"
         style={{ width, height }}
       />
-      <div className="mt-2 text-sm text-gray-600">
-        <p>🔄 Auto-rotating • Use mouse to interact (coming soon)</p>
+      <div className="mt-2 text-sm text-gray-600 text-center">
+        <p className="font-medium">🖱️ Interactive Controls:</p>
+        <p className="text-xs mt-1">
+          Left-click + drag: Rotate • Right-click + drag: Pan • Scroll: Zoom
+        </p>
       </div>
     </div>
   )
