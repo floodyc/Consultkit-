@@ -524,6 +524,8 @@ async def run_calculation(
         # Deduct credits (in production, update database)
         # current_user["credits"] -= credits_needed
 
+        print(f"💾 Storing results in project data...")
+
         # Convert results to response format
         space_results = []
         for sr in results.space_results:
@@ -604,7 +606,8 @@ async def run_calculation(
             for pr in results.plant_results
         ]
 
-        return CalculationResponse(
+        # Create response object
+        response = CalculationResponse(
             project_id=project_id,
             project_name=project["name"],
             status="completed",
@@ -625,6 +628,12 @@ async def run_calculation(
             credits_used=credits_needed,
             warnings=warnings,
         )
+
+        # Store results in project for retrieval later
+        project["calculation_results"] = response.model_dump()
+        print(f"✅ Results stored in project!")
+
+        return response
 
     except Exception as e:
         print(f"\n❌ CALCULATION ERROR!")
@@ -662,14 +671,14 @@ async def get_calculation_results(
             detail="Not authorized",
         )
 
-    if project.get("status") != "completed":
+    # Return stored calculation results
+    if "calculation_results" not in project:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Calculation not yet completed",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No calculation results found. Please run a calculation first.",
         )
 
-    # In production, fetch from database
-    return {"message": "Results stored in database", "project_id": project_id}
+    return project["calculation_results"]
 
 
 @router.get("/{project_id}/hourly-profile/{space_id}")

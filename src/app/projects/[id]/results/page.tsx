@@ -130,8 +130,17 @@ export default function Results() {
     try {
       const projectData = await api.getProject(projectId)
       setProject(projectData)
-      // TODO: Load actual results
-      setResults(mockResults)
+
+      // Load actual calculation results
+      try {
+        const calculationResults = await api.getCalculationResults(projectId)
+        console.log('📊 Loaded calculation results:', calculationResults)
+        setResults(calculationResults)
+      } catch (err: any) {
+        console.warn('No calculation results found:', err.message)
+        // If no results, show message to user
+        setResults(null)
+      }
     } catch (err) {
       router.push('/dashboard')
     } finally {
