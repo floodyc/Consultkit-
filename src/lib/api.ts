@@ -194,6 +194,46 @@ export class APIClient {
     return this.request(`/api/v1/calculations/${calculationId}/results`)
   }
 
+  // Exports
+  async exportPDF(projectId: string) {
+    const response = await fetch(`${API_URL}/api/v1/exports/${projectId}/pdf`, {
+      headers: {
+        'Authorization': `Bearer ${this.token}`,
+      },
+    })
+    if (!response.ok) {
+      throw new Error('Export failed')
+    }
+    const blob = await response.blob()
+    return blob
+  }
+
+  async exportExcel(projectId: string) {
+    const response = await fetch(`${API_URL}/api/v1/exports/${projectId}/excel`, {
+      headers: {
+        'Authorization': `Bearer ${this.token}`,
+      },
+    })
+    if (!response.ok) {
+      throw new Error('Export failed')
+    }
+    const blob = await response.blob()
+    return blob
+  }
+
+  async exportGbXML(projectId: string) {
+    const response = await fetch(`${API_URL}/api/v1/exports/${projectId}/gbxml`, {
+      headers: {
+        'Authorization': `Bearer ${this.token}`,
+      },
+    })
+    if (!response.ok) {
+      throw new Error('Export failed')
+    }
+    const blob = await response.blob()
+    return blob
+  }
+
   // GEM-AI Geometry Extraction
   async uploadFloorplan(projectId: string, file: File) {
     console.log('[API] uploadFloorplan called with:', {

@@ -151,10 +151,37 @@ export default function Results() {
   const handleExport = async (format: string) => {
     setExporting(true)
     try {
-      // TODO: API call to export results
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      alert(`Exporting to ${format.toUpperCase()}... (Demo mode)`)
+      let blob: Blob
+      let filename: string
+
+      // Call appropriate export API based on format
+      if (format === 'pdf') {
+        blob = await api.exportPDF(projectId)
+        filename = `${project?.name || 'project'}_HVACplus_Report.pdf`
+      } else if (format === 'excel') {
+        blob = await api.exportExcel(projectId)
+        filename = `${project?.name || 'project'}_HVACplus_Results.xlsx`
+      } else if (format === 'gbxml') {
+        blob = await api.exportGbXML(projectId)
+        filename = `${project?.name || 'project'}_HVACplus.xml`
+      } else {
+        throw new Error('Unknown export format')
+      }
+
+      // Download the file
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      // Success message
+      alert(`Successfully exported ${format.toUpperCase()} file!`)
     } catch (err: any) {
+      console.error('Export error:', err)
       alert(err.message || 'Export failed')
     } finally {
       setExporting(false)

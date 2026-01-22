@@ -13,6 +13,7 @@ from app.api.endpoints import (
     reports,
     billing,
     weather,
+    exports,
 )
 
 router = APIRouter()
@@ -25,3 +26,4 @@ router.include_router(calculations.router, prefix="/calculations", tags=["Load C
 router.include_router(reports.router, prefix="/reports", tags=["Reports"])
 router.include_router(billing.router, prefix="/billing", tags=["Billing & Credits"])
 router.include_router(weather.router, prefix="/weather", tags=["Weather Data"])
+router.include_router(exports.router, prefix="/exports", tags=["Exports"])
