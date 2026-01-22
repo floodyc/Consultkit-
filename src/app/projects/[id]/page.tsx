@@ -65,6 +65,18 @@ export default function ProjectDetail() {
       setSpaces(spacesData)
       // Load design standard from project (default to ASHRAE 90.1)
       setDesignStandard(projectData.design_standard || 'ASHRAE_90_1')
+
+      // Restore extraction result if it exists (makes floorplan/geometry persistent)
+      if (projectData.extraction_result) {
+        setExtractionResult(projectData.extraction_result)
+        setExtractionApplied(true)
+        setShowGemAI(true)  // Keep GEM-AI section open to show geometry
+      }
+
+      // Restore calculation results if they exist
+      if (projectData.calculation_results) {
+        setCalculationResults(projectData.calculation_results)
+      }
     } catch (err) {
       router.push('/dashboard')
     } finally {
@@ -600,9 +612,25 @@ export default function ProjectDetail() {
                           <div className="bg-gray-50 rounded-lg p-4">
                             <OBJViewer
                               objContent={extractionResult.obj_content}
-                              rooms={extractionResult.rooms}
+                              rooms={extractionResult.rooms.map((room: any) => {
+                                // Enrich room data with load values from calculation results if available
+                                if (calculationResults) {
+                                  const spaceResult = calculationResults.space_results.find(
+                                    (sr: any) => sr.space_name === room.name || sr.space_id === room.id
+                                  )
+                                  if (spaceResult) {
+                                    return {
+                                      ...room,
+                                      cooling_load: spaceResult.peak_cooling_total,
+                                      heating_load: spaceResult.peak_heating,
+                                    }
+                                  }
+                                }
+                                return room
+                              })}
                               width={600}
                               height={400}
+                              showLoads={!!calculationResults}
                             />
                           </div>
                           <p className="text-xs text-gray-500 mt-2 text-center">

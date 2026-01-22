@@ -13,6 +13,8 @@ interface Room {
   width: number
   depth: number
   height: number
+  cooling_load?: number  // W
+  heating_load?: number  // W
 }
 
 interface OBJViewerProps {
@@ -20,9 +22,10 @@ interface OBJViewerProps {
   rooms?: Room[]
   width?: number
   height?: number
+  showLoads?: boolean
 }
 
-export default function OBJViewer({ objContent, rooms = [], width = 600, height = 400 }: OBJViewerProps) {
+export default function OBJViewer({ objContent, rooms = [], width = 600, height = 400, showLoads = false }: OBJViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<THREE.Scene | null>(null)
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null)
@@ -143,16 +146,33 @@ export default function OBJViewer({ objContent, rooms = [], width = 600, height 
         if (!context) return
 
         canvas.width = 256
-        canvas.height = 64
+        canvas.height = showLoads ? 96 : 64
 
         // Draw text on canvas
         context.fillStyle = '#ffffff'
         context.fillRect(0, 0, canvas.width, canvas.height)
-        context.font = 'Bold 24px Arial'
+
+        // Room name
+        context.font = 'Bold 20px Arial'
         context.fillStyle = '#000000'
         context.textAlign = 'center'
         context.textBaseline = 'middle'
-        context.fillText(room.name, canvas.width / 2, canvas.height / 2)
+        context.fillText(room.name, canvas.width / 2, showLoads ? 20 : canvas.height / 2)
+
+        // Load values if requested
+        if (showLoads && (room.cooling_load !== undefined || room.heating_load !== undefined)) {
+          context.font = '16px Arial'
+          if (room.cooling_load !== undefined) {
+            context.fillStyle = '#2563eb'  // Blue for cooling
+            const coolingText = `❄️ ${(room.cooling_load / 1000).toFixed(1)} kW`
+            context.fillText(coolingText, canvas.width / 2, 48)
+          }
+          if (room.heating_load !== undefined) {
+            context.fillStyle = '#dc2626'  // Red for heating
+            const heatingText = `🔥 ${(room.heating_load / 1000).toFixed(1)} kW`
+            context.fillText(heatingText, canvas.width / 2, 72)
+          }
+        }
 
         // Create texture from canvas
         const texture = new THREE.CanvasTexture(canvas)
@@ -171,7 +191,8 @@ export default function OBJViewer({ objContent, rooms = [], width = 600, height 
 
         // Scale sprite based on room size
         const labelScale = Math.min(room.width, room.depth) * 0.4
-        sprite.scale.set(labelScale, labelScale * 0.25, 1)
+        const labelHeight = showLoads ? 0.375 : 0.25  // Taller labels when showing loads
+        sprite.scale.set(labelScale, labelScale * labelHeight, 1)
 
         scene.add(sprite)
         console.log('[OBJViewer] Added label for room:', room.name, 'at', sprite.position)
@@ -219,7 +240,7 @@ export default function OBJViewer({ objContent, rooms = [], width = 600, height 
         containerRef.current.removeChild(renderer.domElement)
       }
     }
-  }, [objContent, width, height])
+  }, [objContent, width, height, rooms, showLoads])
 
   return (
     <div className="flex flex-col items-center">
