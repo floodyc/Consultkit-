@@ -117,6 +117,19 @@ export class APIClient {
     return this.request(`/api/v1/projects/${id}`)
   }
 
+  async updateProject(id: string, data: any) {
+    return this.request(`/api/v1/projects/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async deleteProject(id: string) {
+    return this.request(`/api/v1/projects/${id}`, {
+      method: 'DELETE',
+    })
+  }
+
   // Spaces
   async createSpace(projectId: string, data: any) {
     // Transform frontend data to match backend SpaceData model

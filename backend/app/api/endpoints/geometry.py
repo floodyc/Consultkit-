@@ -407,6 +407,9 @@ async def apply_extraction_to_project(
     project["total_floor_area"] = extraction_result.total_area_m2
     project["updated_at"] = datetime.utcnow()
 
+    # Store extraction result for persistence (so it's available when user returns to page)
+    project["extraction_result"] = extraction_result.model_dump()
+
     return {
         "message": f"Applied {len(spaces)} spaces to project",
         "total_area_m2": extraction_result.total_area_m2,

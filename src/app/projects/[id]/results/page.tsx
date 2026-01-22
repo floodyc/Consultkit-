@@ -367,7 +367,7 @@ export default function Results() {
                   <div className="bg-green-50 rounded-lg p-4">
                     <p className="text-sm text-green-600 font-medium">Cooling Intensity</p>
                     <p className="text-3xl font-bold text-green-900 mt-2">
-                      {results.building_summary.cooling_w_per_m2.toFixed(0)}
+                      {results.building_summary.cooling_w_per_m2.toFixed(1)}
                     </p>
                     <p className="text-sm text-green-600">W/m²</p>
                   </div>
@@ -605,7 +605,7 @@ export default function Results() {
                           <p className="text-3xl font-bold text-orange-600 mt-2">
                             {plant.boiler_capacity_kw.toFixed(1)}
                           </p>
-                          <p className="text-sm text-gray-600">kW ({(plant.boiler_capacity / 1000 * 3.412).toFixed(0)} MBH)</p>
+                          <p className="text-sm text-gray-600">kW ({(plant.boiler_capacity / 1000 * 3.412).toFixed(1)} MBH)</p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-600">Number of Boilers</p>

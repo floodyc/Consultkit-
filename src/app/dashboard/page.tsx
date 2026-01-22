@@ -16,6 +16,10 @@ export default function Dashboard() {
     location: '',
     building_type: 'office',
   })
+  const [showRenameModal, setShowRenameModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [selectedProject, setSelectedProject] = useState<any>(null)
+  const [renameValue, setRenameValue] = useState('')
 
   useEffect(() => {
     loadData()
@@ -51,6 +55,47 @@ export default function Dashboard() {
   const handleLogout = () => {
     api.clearToken()
     router.push('/')
+  }
+
+  const handleRenameProject = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedProject) return
+
+    try {
+      await api.updateProject(selectedProject.id, { name: renameValue })
+      setShowRenameModal(false)
+      setSelectedProject(null)
+      setRenameValue('')
+      loadData()
+    } catch (err: any) {
+      alert(err.message || 'Failed to rename project')
+    }
+  }
+
+  const handleDeleteProject = async () => {
+    if (!selectedProject) return
+
+    try {
+      await api.deleteProject(selectedProject.id)
+      setShowDeleteModal(false)
+      setSelectedProject(null)
+      loadData()
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete project')
+    }
+  }
+
+  const openRenameModal = (project: any, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setSelectedProject(project)
+    setRenameValue(project.name)
+    setShowRenameModal(true)
+  }
+
+  const openDeleteModal = (project: any, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setSelectedProject(project)
+    setShowDeleteModal(true)
   }
 
   if (loading) {
@@ -197,6 +242,80 @@ export default function Dashboard() {
             </div>
           )}
 
+          {/* Rename Project Modal */}
+          {showRenameModal && selectedProject && (
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-lg p-6 max-w-md w-full">
+                <h3 className="text-xl font-bold mb-4">Rename Project</h3>
+                <form onSubmit={handleRenameProject} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      New Project Name
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={renameValue}
+                      onChange={(e) => setRenameValue(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                      placeholder="Enter new name"
+                      autoFocus
+                    />
+                  </div>
+                  <div className="flex space-x-3">
+                    <button
+                      type="submit"
+                      className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                    >
+                      Rename
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowRenameModal(false)
+                        setSelectedProject(null)
+                        setRenameValue('')
+                      }}
+                      className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* Delete Project Modal */}
+          {showDeleteModal && selectedProject && (
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-lg p-6 max-w-md w-full">
+                <h3 className="text-xl font-bold mb-4 text-red-600">Delete Project</h3>
+                <p className="text-gray-700 mb-4">
+                  Are you sure you want to delete <strong>{selectedProject.name}</strong>?
+                  This action cannot be undone.
+                </p>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={handleDeleteProject}
+                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  >
+                    Delete
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowDeleteModal(false)
+                      setSelectedProject(null)
+                    }}
+                    className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {projects.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-lg shadow">
               <p className="text-gray-500 text-lg mb-4">No projects yet</p>
@@ -207,18 +326,38 @@ export default function Dashboard() {
               {projects.map((project) => (
                 <div
                   key={project.id}
-                  onClick={() => router.push(`/projects/${project.id}`)}
-                  className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer p-6"
+                  className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-6 relative"
                 >
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    {project.name}
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                    {project.description || 'No description'}
-                  </p>
-                  <div className="flex items-center justify-between text-sm text-gray-500">
-                    <span>{project.location || 'No location'}</span>
-                    <span className="capitalize">{project.building_type}</span>
+                  {/* Action buttons */}
+                  <div className="absolute top-4 right-4 flex space-x-2">
+                    <button
+                      onClick={(e) => openRenameModal(project, e)}
+                      className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded"
+                      title="Rename project"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      onClick={(e) => openDeleteModal(project, e)}
+                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"
+                      title="Delete project"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+
+                  {/* Project content - clickable */}
+                  <div onClick={() => router.push(`/projects/${project.id}`)} className="cursor-pointer">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2 pr-20">
+                      {project.name}
+                    </h3>
+                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                      {project.description || 'No description'}
+                    </p>
+                    <div className="flex items-center justify-between text-sm text-gray-500">
+                      <span>{project.location || 'No location'}</span>
+                      <span className="capitalize">{project.building_type}</span>
+                    </div>
                   </div>
                 </div>
               ))}

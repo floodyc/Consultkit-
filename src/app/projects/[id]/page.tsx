@@ -65,6 +65,18 @@ export default function ProjectDetail() {
       setSpaces(spacesData)
       // Load design standard from project (default to ASHRAE 90.1)
       setDesignStandard(projectData.design_standard || 'ASHRAE_90_1')
+
+      // Restore extraction result if it exists (makes floorplan/geometry persistent)
+      if (projectData.extraction_result) {
+        setExtractionResult(projectData.extraction_result)
+        setExtractionApplied(true)
+        setShowGemAI(true)  // Keep GEM-AI section open to show geometry
+      }
+
+      // Restore calculation results if they exist
+      if (projectData.calculation_results) {
+        setCalculationResults(projectData.calculation_results)
+      }
     } catch (err) {
       router.push('/dashboard')
     } finally {
@@ -133,7 +145,7 @@ export default function ProjectDetail() {
       })
       console.log('✅ Calculation results received:', result)
       setCalculationResults(result)
-      alert(`Calculation completed!\n\nTotal Cooling: ${result.building_summary.peak_cooling_total.toFixed(0)} W\nTotal Heating: ${result.building_summary.peak_heating.toFixed(0)} W\n\nScroll down to see detailed results.`)
+      alert(`Calculation completed!\n\nTotal Cooling: ${result.building_summary.peak_cooling_total.toFixed(1)} W\nTotal Heating: ${result.building_summary.peak_heating.toFixed(1)} W\n\nScroll down to see detailed results.`)
     } catch (err: any) {
       console.error('❌ Calculation error:', err)
       alert(err.message)
@@ -600,9 +612,25 @@ export default function ProjectDetail() {
                           <div className="bg-gray-50 rounded-lg p-4">
                             <OBJViewer
                               objContent={extractionResult.obj_content}
-                              rooms={extractionResult.rooms}
+                              rooms={extractionResult.rooms.map((room: any) => {
+                                // Enrich room data with load values from calculation results if available
+                                if (calculationResults) {
+                                  const spaceResult = calculationResults.space_results.find(
+                                    (sr: any) => sr.space_name === room.name || sr.space_id === room.id
+                                  )
+                                  if (spaceResult) {
+                                    return {
+                                      ...room,
+                                      cooling_load: spaceResult.peak_cooling_total,
+                                      heating_load: spaceResult.peak_heating,
+                                    }
+                                  }
+                                }
+                                return room
+                              })}
                               width={600}
                               height={400}
+                              showLoads={!!calculationResults}
                             />
                           </div>
                           <p className="text-xs text-gray-500 mt-2 text-center">
@@ -1264,7 +1292,7 @@ export default function ProjectDetail() {
                   <div className="bg-blue-50 p-4 rounded-lg">
                     <div className="text-sm text-blue-600 font-medium">Total Cooling Load</div>
                     <div className="text-2xl font-bold text-blue-900">
-                      {calculationResults.building_summary.peak_cooling_total.toFixed(0)} W
+                      {calculationResults.building_summary.peak_cooling_total.toFixed(1)} W
                     </div>
                     <div className="text-xs text-blue-600">
                       {(calculationResults.building_summary.peak_cooling_total / 3517).toFixed(1)} tons
@@ -1273,7 +1301,7 @@ export default function ProjectDetail() {
                   <div className="bg-red-50 p-4 rounded-lg">
                     <div className="text-sm text-red-600 font-medium">Total Heating Load</div>
                     <div className="text-2xl font-bold text-red-900">
-                      {calculationResults.building_summary.peak_heating.toFixed(0)} W
+                      {calculationResults.building_summary.peak_heating.toFixed(1)} W
                     </div>
                     <div className="text-xs text-red-600">
                       {(calculationResults.building_summary.peak_heating / 1000).toFixed(1)} kW
@@ -1316,11 +1344,11 @@ export default function ProjectDetail() {
                               </div>
                               <div>
                                 <span className="text-gray-500">Cooling:</span>{' '}
-                                <span className="font-medium text-blue-600">{space.peak_cooling_total.toFixed(0)} W</span>
+                                <span className="font-medium text-blue-600">{space.peak_cooling_total.toFixed(1)} W</span>
                               </div>
                               <div>
                                 <span className="text-gray-500">Heating:</span>{' '}
-                                <span className="font-medium text-red-600">{space.peak_heating.toFixed(0)} W</span>
+                                <span className="font-medium text-red-600">{space.peak_heating.toFixed(1)} W</span>
                               </div>
                               <div>
                                 <span className="text-gray-500">W/m²:</span>{' '}
@@ -1328,11 +1356,11 @@ export default function ProjectDetail() {
                               </div>
                               <div>
                                 <span className="text-gray-500">Airflow:</span>{' '}
-                                <span className="font-medium">{space.supply_airflow_cooling.toFixed(3)} m³/s</span>
+                                <span className="font-medium">{space.supply_airflow_cooling.toFixed(1)} m³/s</span>
                               </div>
                               <div>
                                 <span className="text-gray-500">CFM:</span>{' '}
-                                <span className="font-medium">{(space.supply_airflow_cooling * 2118.88).toFixed(0)}</span>
+                                <span className="font-medium">{(space.supply_airflow_cooling * 2118.88).toFixed(1)}</span>
                               </div>
                             </div>
                           </div>
@@ -1356,19 +1384,19 @@ export default function ProjectDetail() {
                               <div className="space-y-2">
                                 <div className="flex justify-between text-sm">
                                   <span className="text-gray-600">Sensible:</span>
-                                  <span className="font-medium">{space.peak_cooling_sensible.toFixed(0)} W</span>
+                                  <span className="font-medium">{space.peak_cooling_sensible.toFixed(1)} W</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                   <span className="text-gray-600">Latent:</span>
-                                  <span className="font-medium">{space.peak_cooling_latent.toFixed(0)} W</span>
+                                  <span className="font-medium">{space.peak_cooling_latent.toFixed(1)} W</span>
                                 </div>
                                 <div className="flex justify-between text-sm font-semibold border-t pt-2">
                                   <span className="text-gray-900">Total:</span>
-                                  <span className="text-blue-600">{space.peak_cooling_total.toFixed(0)} W</span>
+                                  <span className="text-blue-600">{space.peak_cooling_total.toFixed(1)} W</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                   <span className="text-gray-600">Tons:</span>
-                                  <span className="font-medium">{(space.peak_cooling_total / 3517).toFixed(2)}</span>
+                                  <span className="font-medium">{(space.peak_cooling_total / 3517).toFixed(1)}</span>
                                 </div>
                               </div>
 
@@ -1380,7 +1408,7 @@ export default function ProjectDetail() {
                                     {Object.entries(space.components).map(([key, comp]: [string, any]) => (
                                       <div key={key} className="flex justify-between text-xs">
                                         <span className="text-gray-600" title={comp.description}>{comp.name}:</span>
-                                        <span className="font-medium">{comp.total_cooling.toFixed(0)} W</span>
+                                        <span className="font-medium">{comp.total_cooling.toFixed(1)} W</span>
                                       </div>
                                     ))}
                                   </div>
@@ -1397,7 +1425,7 @@ export default function ProjectDetail() {
                               <div className="space-y-2">
                                 <div className="flex justify-between text-sm">
                                   <span className="text-gray-600">Peak Heating:</span>
-                                  <span className="font-medium text-red-600">{space.peak_heating.toFixed(0)} W</span>
+                                  <span className="font-medium text-red-600">{space.peak_heating.toFixed(1)} W</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                   <span className="text-gray-600">Heating W/m²:</span>
@@ -1405,15 +1433,15 @@ export default function ProjectDetail() {
                                 </div>
                                 <div className="flex justify-between text-sm">
                                   <span className="text-gray-600">Heating kW:</span>
-                                  <span className="font-medium">{(space.peak_heating / 1000).toFixed(2)}</span>
+                                  <span className="font-medium">{(space.peak_heating / 1000).toFixed(1)}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                   <span className="text-gray-600">Outdoor Air:</span>
-                                  <span className="font-medium">{space.outdoor_airflow.toFixed(3)} m³/s</span>
+                                  <span className="font-medium">{space.outdoor_airflow.toFixed(1)} m³/s</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                   <span className="text-gray-600">OA CFM:</span>
-                                  <span className="font-medium">{(space.outdoor_airflow * 2118.88).toFixed(0)}</span>
+                                  <span className="font-medium">{(space.outdoor_airflow * 2118.88).toFixed(1)}</span>
                                 </div>
                               </div>
 
