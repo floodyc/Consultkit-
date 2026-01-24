@@ -247,42 +247,46 @@ export default function Results() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+      <nav className="bg-white shadow-lg border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
+          <div className="flex justify-between h-20 items-center">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => router.push(`/projects/${projectId}`)}
-                className="text-gray-600 hover:text-gray-900"
+                className="flex items-center text-gray-600 hover:text-indigo-600 font-medium transition-colors group"
               >
-                ← Back
+                <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back
               </button>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Calculation Results: {results.project_name}
+              <div className="h-8 w-px bg-gray-300"></div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
+                {results.project_name}
               </h1>
             </div>
             <div className="flex items-center space-x-3">
               <button
                 onClick={() => handleExport('pdf')}
                 disabled={exporting}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 text-sm"
+                className="px-5 py-2.5 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-xl hover:from-red-600 hover:to-pink-700 disabled:opacity-50 text-sm font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
               >
-                📄 Export PDF
+                📄 PDF
               </button>
               <button
                 onClick={() => handleExport('excel')}
                 disabled={exporting}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm"
+                className="px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 disabled:opacity-50 text-sm font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
               >
-                📊 Export Excel
+                📊 Excel
               </button>
               <button
                 onClick={() => handleExport('gbxml')}
                 disabled={exporting}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm"
+                className="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 disabled:opacity-50 text-sm font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
               >
-                📐 Export gbXML
+                📐 gbXML
               </button>
             </div>
           </div>
@@ -315,28 +319,47 @@ export default function Results() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
         {/* Status Bar */}
-        <div className="bg-white rounded-lg shadow p-4 mb-6">
+        <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-100">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-6">
-              <div>
-                <span className="text-sm text-gray-600">Status:</span>
-                <span className="ml-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                  ✓ Completed
-                </span>
+            <div className="flex items-center space-x-8">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div>
+                  <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Status</span>
+                  <p className="text-sm font-bold text-green-600">Completed</p>
+                </div>
               </div>
-              <div>
-                <span className="text-sm text-gray-600">Calculated:</span>
-                <span className="ml-2 text-sm font-medium text-gray-900">
-                  {new Date(results.calculated_at).toLocaleString()}
-                </span>
+              <div className="h-12 w-px bg-gray-200"></div>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Calculated</span>
+                  <p className="text-sm font-bold text-gray-900">
+                    {new Date(results.calculated_at).toLocaleString()}
+                  </p>
+                </div>
               </div>
-              <div>
-                <span className="text-sm text-gray-600">Credits Used:</span>
-                <span className="ml-2 text-sm font-medium text-gray-900">
-                  {results.credits_used}
-                </span>
+              <div className="h-12 w-px bg-gray-200"></div>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Credits Used</span>
+                  <p className="text-sm font-bold text-gray-900">{results.credits_used}</p>
+                </div>
               </div>
             </div>
           </div>
@@ -366,20 +389,20 @@ export default function Results() {
         )}
 
         {/* Tabs */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="border-b border-gray-200">
-            <nav className="flex -mb-px">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+          <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+            <nav className="flex -mb-px overflow-x-auto">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${
+                  className={`py-4 px-6 text-sm font-semibold border-b-3 transition-all whitespace-nowrap ${
                     activeTab === tab.id
-                      ? 'border-indigo-500 text-indigo-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'border-b-4 border-indigo-600 text-indigo-600 bg-white'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'
                   }`}
                 >
-                  <span className="mr-2">{tab.icon}</span>
+                  <span className="text-lg mr-2">{tab.icon}</span>
                   {tab.name}
                 </button>
               ))}
@@ -388,141 +411,257 @@ export default function Results() {
 
           <div className="p-6">
             {activeTab === 'summary' && (
-              <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-gray-900">Building Summary</h2>
+              <div className="space-y-8">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">Building Summary</h2>
+                </div>
 
                 {/* Key Metrics */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="bg-blue-50 rounded-lg p-4">
-                    <p className="text-sm text-blue-600 font-medium">Total Floor Area</p>
-                    <p className="text-3xl font-bold text-blue-900 mt-2">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 shadow-lg transform transition hover:scale-105">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm text-blue-100 font-semibold uppercase tracking-wide">Floor Area</p>
+                      <span className="text-2xl">📐</span>
+                    </div>
+                    <p className="text-4xl font-bold text-white mt-3">
                       {results.building_summary.total_floor_area.toFixed(1)}
                     </p>
-                    <p className="text-sm text-blue-600">m²</p>
+                    <p className="text-sm text-blue-100 mt-1">m²</p>
                   </div>
 
-                  <div className="bg-red-50 rounded-lg p-4">
-                    <p className="text-sm text-red-600 font-medium">Peak Cooling Load</p>
-                    <p className="text-3xl font-bold text-red-900 mt-2">
+                  <div className="bg-gradient-to-br from-cyan-500 to-blue-500 rounded-xl p-6 shadow-lg transform transition hover:scale-105">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm text-cyan-100 font-semibold uppercase tracking-wide">Peak Cooling</p>
+                      <span className="text-2xl">❄️</span>
+                    </div>
+                    <p className="text-4xl font-bold text-white mt-3">
                       {(results.building_summary.peak_cooling_total / 1000).toFixed(1)}
                     </p>
-                    <p className="text-sm text-red-600">kW</p>
+                    <p className="text-sm text-cyan-100 mt-1">kW ({(results.building_summary.peak_cooling_total / 3517).toFixed(1)} tons)</p>
                   </div>
 
-                  <div className="bg-orange-50 rounded-lg p-4">
-                    <p className="text-sm text-orange-600 font-medium">Peak Heating Load</p>
-                    <p className="text-3xl font-bold text-orange-900 mt-2">
+                  <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-xl p-6 shadow-lg transform transition hover:scale-105">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm text-orange-100 font-semibold uppercase tracking-wide">Peak Heating</p>
+                      <span className="text-2xl">🔥</span>
+                    </div>
+                    <p className="text-4xl font-bold text-white mt-3">
                       {(results.building_summary.peak_heating / 1000).toFixed(1)}
                     </p>
-                    <p className="text-sm text-orange-600">kW</p>
+                    <p className="text-sm text-orange-100 mt-1">kW</p>
                   </div>
 
-                  <div className="bg-green-50 rounded-lg p-4">
-                    <p className="text-sm text-green-600 font-medium">Cooling Intensity</p>
-                    <p className="text-3xl font-bold text-green-900 mt-2">
+                  <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-6 shadow-lg transform transition hover:scale-105">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm text-green-100 font-semibold uppercase tracking-wide">Intensity</p>
+                      <span className="text-2xl">⚡</span>
+                    </div>
+                    <p className="text-4xl font-bold text-white mt-3">
                       {results.building_summary.cooling_w_per_m2.toFixed(1)}
                     </p>
-                    <p className="text-sm text-green-600">W/m²</p>
+                    <p className="text-sm text-green-100 mt-1">W/m²</p>
                   </div>
                 </div>
 
-                {/* Load Breakdown Chart Placeholder */}
-                <div className="border rounded-lg p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Load Breakdown</h3>
-                  <div className="h-64 flex items-center justify-center bg-gray-50 rounded">
-                    <div className="text-center text-gray-500">
-                      <svg className="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                      </svg>
-                      <p>Chart Placeholder</p>
-                      <p className="text-sm">Cooling vs Heating Load Comparison</p>
+                {/* Load Comparison Bar Charts */}
+                <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <span className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg p-2 mr-3">📊</span>
+                    Load Distribution by Space
+                  </h3>
+                  <div className="space-y-4">
+                    {results.space_results.map((space: any, idx: number) => {
+                      const maxLoad = Math.max(
+                        ...results.space_results.map((s: any) => Math.max(s.peak_cooling_total, s.peak_heating))
+                      )
+                      const coolingPercent = (space.peak_cooling_total / maxLoad) * 100
+                      const heatingPercent = (space.peak_heating / maxLoad) * 100
+
+                      return (
+                        <div key={idx} className="group hover:bg-gray-50 p-4 rounded-lg transition-colors">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                              {space.space_name}
+                            </span>
+                            <div className="flex gap-4 text-sm">
+                              <span className="text-cyan-600 font-medium">
+                                ❄️ {(space.peak_cooling_total / 1000).toFixed(1)} kW
+                              </span>
+                              <span className="text-orange-600 font-medium">
+                                🔥 {(space.peak_heating / 1000).toFixed(1)} kW
+                              </span>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            {/* Cooling Bar */}
+                            <div className="relative h-6 bg-gray-100 rounded-full overflow-hidden">
+                              <div
+                                className="absolute h-full bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full transition-all duration-500 ease-out flex items-center justify-end pr-2"
+                                style={{ width: `${coolingPercent}%` }}
+                              >
+                                {coolingPercent > 15 && (
+                                  <span className="text-xs font-bold text-white">Cooling</span>
+                                )}
+                              </div>
+                            </div>
+                            {/* Heating Bar */}
+                            <div className="relative h-6 bg-gray-100 rounded-full overflow-hidden">
+                              <div
+                                className="absolute h-full bg-gradient-to-r from-orange-400 to-red-500 rounded-full transition-all duration-500 ease-out flex items-center justify-end pr-2"
+                                style={{ width: `${heatingPercent}%` }}
+                              >
+                                {heatingPercent > 15 && (
+                                  <span className="text-xs font-bold text-white">Heating</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Total Loads Comparison */}
+                <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg p-2 mr-3">🎯</span>
+                    Total Building Loads
+                  </h3>
+                  <div className="space-y-6">
+                    {/* Total Cooling */}
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-lg font-semibold text-gray-900">Total Cooling Load</span>
+                        <span className="text-2xl font-bold text-cyan-600">
+                          {(results.building_summary.peak_cooling_total / 1000).toFixed(1)} kW
+                        </span>
+                      </div>
+                      <div className="relative h-12 bg-gray-100 rounded-xl overflow-hidden shadow-inner">
+                        <div
+                          className="absolute h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 rounded-xl flex items-center justify-center transition-all duration-1000 ease-out"
+                          style={{ width: '100%' }}
+                        >
+                          <span className="text-white font-bold text-sm">
+                            {(results.building_summary.peak_cooling_total / 3517).toFixed(1)} tons refrigeration
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Total Heating */}
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-lg font-semibold text-gray-900">Total Heating Load</span>
+                        <span className="text-2xl font-bold text-orange-600">
+                          {(results.building_summary.peak_heating / 1000).toFixed(1)} kW
+                        </span>
+                      </div>
+                      <div className="relative h-12 bg-gray-100 rounded-xl overflow-hidden shadow-inner">
+                        <div
+                          className="absolute h-full bg-gradient-to-r from-orange-400 via-red-500 to-pink-600 rounded-xl flex items-center justify-center transition-all duration-1000 ease-out"
+                          style={{ width: `${(results.building_summary.peak_heating / results.building_summary.peak_cooling_total) * 100}%` }}
+                        >
+                          <span className="text-white font-bold text-sm">
+                            {((results.building_summary.peak_heating / results.building_summary.peak_cooling_total) * 100).toFixed(1)}% of cooling
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Load Components Table */}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Load Components</h3>
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Component</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cooling (W)</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Heating (W)</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">% of Total</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      <tr>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Sensible Cooling</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{results.building_summary.peak_cooling_sensible.toLocaleString()}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">—</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">81.7%</td>
-                      </tr>
-                      <tr className="bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Latent Cooling</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{results.building_summary.peak_cooling_latent.toLocaleString()}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">—</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">18.3%</td>
-                      </tr>
-                      <tr>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Total</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">{results.building_summary.peak_cooling_total.toLocaleString()}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">{results.building_summary.peak_heating.toLocaleString()}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">100%</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                {/* Load Components */}
+                <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <span className="bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-lg p-2 mr-3">📋</span>
+                    Load Component Breakdown
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Sensible Cooling */}
+                    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-200">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-bold text-blue-900 uppercase tracking-wide">Sensible Cooling</span>
+                        <span className="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded-full">
+                          {((results.building_summary.peak_cooling_sensible / results.building_summary.peak_cooling_total) * 100).toFixed(1)}%
+                        </span>
+                      </div>
+                      <p className="text-3xl font-bold text-blue-600">
+                        {(results.building_summary.peak_cooling_sensible / 1000).toFixed(1)}
+                      </p>
+                      <p className="text-sm text-blue-700 mt-1">kW</p>
+                    </div>
+
+                    {/* Latent Cooling */}
+                    <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-6 border border-purple-200">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-bold text-purple-900 uppercase tracking-wide">Latent Cooling</span>
+                        <span className="text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded-full">
+                          {((results.building_summary.peak_cooling_latent / results.building_summary.peak_cooling_total) * 100).toFixed(1)}%
+                        </span>
+                      </div>
+                      <p className="text-3xl font-bold text-purple-600">
+                        {(results.building_summary.peak_cooling_latent / 1000).toFixed(1)}
+                      </p>
+                      <p className="text-sm text-purple-700 mt-1">kW</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
 
             {activeTab === 'spaces' && (
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold text-gray-900">Space-by-Space Results</h2>
-                <p className="text-sm text-gray-600">Click on any space to see detailed load breakdown</p>
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent mb-2">Space-by-Space Results</h2>
+                  <p className="text-sm text-gray-600">Click on any space to see detailed load breakdown</p>
+                </div>
 
                 {results.space_results.map((space: any, idx: number) => {
                   const isExpanded = expandedSpaces.has(space.space_id)
                   return (
-                    <div key={idx} className="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div key={idx} className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 transform transition-all hover:shadow-xl">
                       {/* Space Header - Always visible, clickable */}
                       <div
-                        className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                        className="p-6 cursor-pointer hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 transition-all"
                         onClick={() => toggleSpaceExpanded(space.space_id)}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
-                            <h4 className="text-md font-semibold text-gray-900">{space.space_name}</h4>
-                            <div className="mt-1 grid grid-cols-2 md:grid-cols-6 gap-2 text-sm">
-                              <div>
-                                <span className="text-gray-500">Area:</span>{' '}
-                                <span className="font-medium">{space.floor_area.toFixed(1)} m²</span>
+                            <h4 className="text-lg font-bold text-gray-900 mb-3">{space.space_name}</h4>
+                            <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+                              <div className="bg-gray-50 rounded-lg p-3">
+                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold block mb-1">Area</span>
+                                <span className="font-bold text-gray-900">{space.floor_area.toFixed(1)} m²</span>
                               </div>
-                              <div>
-                                <span className="text-gray-500">Cooling:</span>{' '}
-                                <span className="font-medium text-blue-600">{(space.peak_cooling_total / 1000).toFixed(1)} kW</span>
+                              <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-lg p-3 border border-cyan-100">
+                                <span className="text-xs text-cyan-700 uppercase tracking-wide font-semibold block mb-1">Cooling</span>
+                                <span className="font-bold text-cyan-700">{(space.peak_cooling_total / 1000).toFixed(1)} kW</span>
                               </div>
-                              <div>
-                                <span className="text-gray-500">Heating:</span>{' '}
-                                <span className="font-medium text-red-600">{(space.peak_heating / 1000).toFixed(1)} kW</span>
+                              <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-lg p-3 border border-orange-100">
+                                <span className="text-xs text-orange-700 uppercase tracking-wide font-semibold block mb-1">Heating</span>
+                                <span className="font-bold text-orange-700">{(space.peak_heating / 1000).toFixed(1)} kW</span>
                               </div>
-                              <div>
-                                <span className="text-gray-500">W/m²:</span>{' '}
-                                <span className="font-medium">{space.cooling_w_per_m2?.toFixed(1) || 'N/A'}</span>
+                              <div className="bg-gray-50 rounded-lg p-3">
+                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold block mb-1">Intensity</span>
+                                <span className="font-bold text-gray-900">{space.cooling_w_per_m2?.toFixed(1) || 'N/A'} W/m²</span>
                               </div>
-                              <div>
-                                <span className="text-gray-500">Airflow:</span>{' '}
-                                <span className="font-medium">{space.supply_airflow_cooling.toFixed(1)} m³/s</span>
+                              <div className="bg-purple-50 rounded-lg p-3 border border-purple-100">
+                                <span className="text-xs text-purple-700 uppercase tracking-wide font-semibold block mb-1">Airflow</span>
+                                <span className="font-bold text-purple-700">{space.supply_airflow_cooling.toFixed(1)} m³/s</span>
                               </div>
-                              <div>
-                                <span className="text-gray-500">CFM:</span>{' '}
-                                <span className="font-medium">{(space.supply_airflow_cooling * 2118.88).toFixed(1)}</span>
+                              <div className="bg-purple-50 rounded-lg p-3 border border-purple-100">
+                                <span className="text-xs text-purple-700 uppercase tracking-wide font-semibold block mb-1">CFM</span>
+                                <span className="font-bold text-purple-700">{(space.supply_airflow_cooling * 2118.88).toFixed(1)}</span>
                               </div>
                             </div>
                           </div>
-                          <div className="ml-4 text-gray-400">
-                            {isExpanded ? '▼' : '▶'}
+                          <div className="ml-4">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isExpanded ? 'bg-indigo-100 text-indigo-600 rotate-180' : 'bg-gray-100 text-gray-400'}`}>
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -994,34 +1133,47 @@ export default function Results() {
 
             {activeTab === 'zones' && (
               <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-gray-900">Zone Results</h2>
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">Zone Results</h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {results.zone_results.map((zone: any) => (
-                    <div key={zone.zone_id} className="border rounded-lg p-6 bg-gray-50">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">{zone.zone_name}</h3>
-                      <dl className="space-y-3">
-                        <div className="flex justify-between">
-                          <dt className="text-sm text-gray-600">Floor Area:</dt>
-                          <dd className="text-sm font-medium text-gray-900">{zone.total_floor_area.toFixed(1)} m²</dd>
+                    <div key={zone.zone_id} className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 transform transition-all hover:shadow-xl hover:-translate-y-1">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-xl font-bold text-gray-900">{zone.zone_name}</h3>
+                        <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-blue-500 rounded-xl flex items-center justify-center">
+                          <span className="text-2xl">🗺️</span>
                         </div>
-                        <div className="flex justify-between">
-                          <dt className="text-sm text-gray-600">Peak Cooling:</dt>
-                          <dd className="text-sm font-medium text-gray-900">{(zone.peak_cooling_total / 1000).toFixed(1)} kW</dd>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <div className="flex justify-between items-center mb-2">
+                            <dt className="text-sm text-gray-600 font-semibold">Floor Area</dt>
+                            <dd className="text-lg font-bold text-gray-900">{zone.total_floor_area.toFixed(1)} m²</dd>
+                          </div>
                         </div>
-                        <div className="flex justify-between">
-                          <dt className="text-sm text-gray-600">Peak Heating:</dt>
-                          <dd className="text-sm font-medium text-gray-900">{(zone.peak_heating / 1000).toFixed(1)} kW</dd>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-lg p-4 border border-cyan-200">
+                            <dt className="text-xs text-cyan-700 font-semibold uppercase tracking-wide mb-1">Peak Cooling</dt>
+                            <dd className="text-xl font-bold text-cyan-700">{(zone.peak_cooling_total / 1000).toFixed(1)} kW</dd>
+                          </div>
+                          <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-lg p-4 border border-orange-200">
+                            <dt className="text-xs text-orange-700 font-semibold uppercase tracking-wide mb-1">Peak Heating</dt>
+                            <dd className="text-xl font-bold text-orange-700">{(zone.peak_heating / 1000).toFixed(1)} kW</dd>
+                          </div>
                         </div>
-                        <div className="flex justify-between border-t pt-3">
-                          <dt className="text-sm font-semibold text-gray-900">Sized Cooling:</dt>
-                          <dd className="text-sm font-bold text-blue-600">{(zone.sized_cooling_load / 1000).toFixed(1)} kW</dd>
+                        <div className="border-t-2 border-gray-200 pt-4 mt-4">
+                          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg p-4 text-white">
+                            <div className="flex justify-between items-center mb-2">
+                              <dt className="text-sm font-semibold">Sized Cooling Capacity</dt>
+                              <dd className="text-2xl font-bold">{(zone.sized_cooling_load / 1000).toFixed(1)} kW</dd>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <dt className="text-sm font-semibold">Sized Heating Capacity</dt>
+                              <dd className="text-2xl font-bold">{(zone.sized_heating_load / 1000).toFixed(1)} kW</dd>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex justify-between">
-                          <dt className="text-sm font-semibold text-gray-900">Sized Heating:</dt>
-                          <dd className="text-sm font-bold text-orange-600">{(zone.sized_heating_load / 1000).toFixed(1)} kW</dd>
-                        </div>
-                      </dl>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1030,52 +1182,70 @@ export default function Results() {
 
             {activeTab === 'systems' && (
               <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-gray-900">HVAC System Sizing</h2>
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">HVAC System Sizing</h2>
 
                 {results.system_results.map((system: any) => (
-                  <div key={system.system_id} className="border rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-6">
+                  <div key={system.system_id} className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+                    <div className="flex items-center justify-between mb-8">
                       <div>
-                        <h3 className="text-xl font-semibold text-gray-900">{system.system_name}</h3>
-                        <p className="text-sm text-gray-600 mt-1">{system.system_type}</p>
+                        <h3 className="text-2xl font-bold text-gray-900">{system.system_name}</h3>
+                        <p className="text-sm text-gray-600 mt-2 flex items-center">
+                          <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                          {system.system_type}
+                        </p>
                       </div>
-                      <span className="px-4 py-2 bg-indigo-100 text-indigo-800 rounded-full text-sm font-medium">
-                        Primary System
-                      </span>
+                      <div className="flex items-center space-x-3">
+                        <span className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl text-sm font-bold shadow-md">
+                          ⭐ Primary System
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                      <div>
-                        <p className="text-sm text-gray-600">Cooling Capacity</p>
-                        <p className="text-2xl font-bold text-blue-600 mt-1">
-                          {(system.sized_cooling_capacity / 1000).toFixed(1)} kW
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                      <div className="bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl p-6 text-white shadow-lg transform transition hover:scale-105">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-sm font-semibold opacity-90">Cooling Capacity</p>
+                          <span className="text-2xl">❄️</span>
+                        </div>
+                        <p className="text-3xl font-bold mt-2">
+                          {(system.sized_cooling_capacity / 1000).toFixed(1)}
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          ({(system.sized_cooling_capacity / 3517).toFixed(1)} tons)
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="text-sm text-gray-600">Heating Capacity</p>
-                        <p className="text-2xl font-bold text-orange-600 mt-1">
-                          {(system.sized_heating_capacity / 1000).toFixed(1)} kW
+                        <p className="text-xs opacity-80 mt-1">
+                          kW ({(system.sized_cooling_capacity / 3517).toFixed(1)} tons)
                         </p>
                       </div>
 
-                      <div>
-                        <p className="text-sm text-gray-600">Supply Airflow</p>
-                        <p className="text-2xl font-bold text-gray-900 mt-1">
+                      <div className="bg-gradient-to-br from-orange-500 to-red-600 rounded-xl p-6 text-white shadow-lg transform transition hover:scale-105">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-sm font-semibold opacity-90">Heating Capacity</p>
+                          <span className="text-2xl">🔥</span>
+                        </div>
+                        <p className="text-3xl font-bold mt-2">
+                          {(system.sized_heating_capacity / 1000).toFixed(1)}
+                        </p>
+                        <p className="text-xs opacity-80 mt-1">kW</p>
+                      </div>
+
+                      <div className="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl p-6 text-white shadow-lg transform transition hover:scale-105">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-sm font-semibold opacity-90">Supply Airflow</p>
+                          <span className="text-2xl">💨</span>
+                        </div>
+                        <p className="text-3xl font-bold mt-2">
                           {system.total_supply_airflow.toLocaleString()}
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">L/s</p>
+                        <p className="text-xs opacity-80 mt-1">L/s</p>
                       </div>
 
-                      <div>
-                        <p className="text-sm text-gray-600">Cooling Coil Load</p>
-                        <p className="text-2xl font-bold text-gray-900 mt-1">
+                      <div className="bg-gradient-to-br from-green-500 to-teal-600 rounded-xl p-6 text-white shadow-lg transform transition hover:scale-105">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-sm font-semibold opacity-90">Cooling Coil</p>
+                          <span className="text-2xl">🌡️</span>
+                        </div>
+                        <p className="text-3xl font-bold mt-2">
                           {(system.cooling_coil_total / 1000).toFixed(1)}
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">kW</p>
+                        <p className="text-xs opacity-80 mt-1">kW</p>
                       </div>
                     </div>
                   </div>
@@ -1084,61 +1254,85 @@ export default function Results() {
             )}
 
             {activeTab === 'plant' && (
-              <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-gray-900">Central Plant Equipment</h2>
+              <div className="space-y-8">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">Central Plant Equipment</h2>
 
                 {results.plant_results.map((plant: any) => (
                   <div key={plant.plant_id} className="space-y-6">
-                    <div className="border rounded-lg p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
-                      <h3 className="text-xl font-semibold text-gray-900 mb-4">Chiller Plant</h3>
-                      <div className="grid grid-cols-3 gap-6">
-                        <div>
-                          <p className="text-sm text-gray-600">Total Capacity</p>
-                          <p className="text-3xl font-bold text-blue-600 mt-2">
-                            {plant.chiller_capacity_tons.toFixed(1)}
-                          </p>
-                          <p className="text-sm text-gray-600">tons ({(plant.chiller_capacity / 1000).toFixed(1)} kW)</p>
+                    <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                      <div className="bg-gradient-to-r from-cyan-500 to-blue-600 p-6">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-2xl font-bold text-white flex items-center">
+                            <span className="text-3xl mr-3">❄️</span>
+                            Chiller Plant
+                          </h3>
+                          <span className="px-4 py-2 bg-white bg-opacity-20 backdrop-blur-sm text-white rounded-xl text-sm font-bold">
+                            Cooling
+                          </span>
                         </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Number of Chillers</p>
-                          <p className="text-3xl font-bold text-gray-900 mt-2">
-                            {plant.num_chillers}
-                          </p>
-                          <p className="text-sm text-gray-600">units</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Per Chiller</p>
-                          <p className="text-3xl font-bold text-gray-900 mt-2">
-                            {(plant.chiller_capacity_tons / plant.num_chillers).toFixed(1)}
-                          </p>
-                          <p className="text-sm text-gray-600">tons each</p>
+                      </div>
+                      <div className="p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-6 border border-cyan-200">
+                            <p className="text-sm text-cyan-700 font-semibold uppercase tracking-wide mb-2">Total Capacity</p>
+                            <p className="text-4xl font-bold text-cyan-700 mt-2">
+                              {plant.chiller_capacity_tons.toFixed(1)}
+                            </p>
+                            <p className="text-sm text-cyan-600 mt-1">tons ({(plant.chiller_capacity / 1000).toFixed(1)} kW)</p>
+                          </div>
+                          <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                            <p className="text-sm text-gray-600 font-semibold uppercase tracking-wide mb-2">Chillers</p>
+                            <p className="text-4xl font-bold text-gray-900 mt-2">
+                              {plant.num_chillers}
+                            </p>
+                            <p className="text-sm text-gray-600 mt-1">units</p>
+                          </div>
+                          <div className="bg-indigo-50 rounded-xl p-6 border border-indigo-200">
+                            <p className="text-sm text-indigo-700 font-semibold uppercase tracking-wide mb-2">Per Chiller</p>
+                            <p className="text-4xl font-bold text-indigo-700 mt-2">
+                              {(plant.chiller_capacity_tons / plant.num_chillers).toFixed(1)}
+                            </p>
+                            <p className="text-sm text-indigo-600 mt-1">tons each</p>
+                          </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="border rounded-lg p-6 bg-gradient-to-r from-orange-50 to-red-50">
-                      <h3 className="text-xl font-semibold text-gray-900 mb-4">Boiler Plant</h3>
-                      <div className="grid grid-cols-3 gap-6">
-                        <div>
-                          <p className="text-sm text-gray-600">Total Capacity</p>
-                          <p className="text-3xl font-bold text-orange-600 mt-2">
-                            {plant.boiler_capacity_kw.toFixed(1)}
-                          </p>
-                          <p className="text-sm text-gray-600">kW ({(plant.boiler_capacity / 1000 * 3.412).toFixed(1)} MBH)</p>
+                    <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                      <div className="bg-gradient-to-r from-orange-500 to-red-600 p-6">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-2xl font-bold text-white flex items-center">
+                            <span className="text-3xl mr-3">🔥</span>
+                            Boiler Plant
+                          </h3>
+                          <span className="px-4 py-2 bg-white bg-opacity-20 backdrop-blur-sm text-white rounded-xl text-sm font-bold">
+                            Heating
+                          </span>
                         </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Number of Boilers</p>
-                          <p className="text-3xl font-bold text-gray-900 mt-2">
-                            {plant.num_boilers}
-                          </p>
-                          <p className="text-sm text-gray-600">units</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Per Boiler</p>
-                          <p className="text-3xl font-bold text-gray-900 mt-2">
-                            {(plant.boiler_capacity_kw / plant.num_boilers).toFixed(1)}
-                          </p>
-                          <p className="text-sm text-gray-600">kW each</p>
+                      </div>
+                      <div className="p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-6 border border-orange-200">
+                            <p className="text-sm text-orange-700 font-semibold uppercase tracking-wide mb-2">Total Capacity</p>
+                            <p className="text-4xl font-bold text-orange-700 mt-2">
+                              {plant.boiler_capacity_kw.toFixed(1)}
+                            </p>
+                            <p className="text-sm text-orange-600 mt-1">kW ({(plant.boiler_capacity / 1000 * 3.412).toFixed(1)} MBH)</p>
+                          </div>
+                          <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                            <p className="text-sm text-gray-600 font-semibold uppercase tracking-wide mb-2">Boilers</p>
+                            <p className="text-4xl font-bold text-gray-900 mt-2">
+                              {plant.num_boilers}
+                            </p>
+                            <p className="text-sm text-gray-600 mt-1">units</p>
+                          </div>
+                          <div className="bg-pink-50 rounded-xl p-6 border border-pink-200">
+                            <p className="text-sm text-pink-700 font-semibold uppercase tracking-wide mb-2">Per Boiler</p>
+                            <p className="text-4xl font-bold text-pink-700 mt-2">
+                              {(plant.boiler_capacity_kw / plant.num_boilers).toFixed(1)}
+                            </p>
+                            <p className="text-sm text-pink-600 mt-1">kW each</p>
+                          </div>
                         </div>
                       </div>
                     </div>
