@@ -23,9 +23,10 @@ interface OBJViewerProps {
   width?: number
   height?: number
   showLoads?: boolean
+  showLabels?: boolean  // Always show room name labels
 }
 
-export default function OBJViewer({ objContent, rooms = [], width = 600, height = 400, showLoads = false }: OBJViewerProps) {
+export default function OBJViewer({ objContent, rooms = [], width = 600, height = 400, showLoads = false, showLabels = true }: OBJViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<THREE.Scene | null>(null)
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null)
@@ -136,8 +137,8 @@ export default function OBJViewer({ objContent, rooms = [], width = 600, height 
     mesh.add(wireframe)
     console.log('[OBJViewer] Added wireframe, total children:', mesh.children.length)
 
-    // Add room labels if rooms data is provided
-    if (rooms && rooms.length > 0) {
+    // Add room labels if rooms data is provided and showLabels is true
+    if (showLabels && rooms && rooms.length > 0) {
       console.log('[OBJViewer] Adding labels for', rooms.length, 'rooms')
       rooms.forEach((room) => {
         // Create canvas for text
@@ -145,32 +146,51 @@ export default function OBJViewer({ objContent, rooms = [], width = 600, height 
         const context = canvas.getContext('2d')
         if (!context) return
 
-        canvas.width = 256
-        canvas.height = showLoads ? 96 : 64
+        canvas.width = 300
+        canvas.height = showLoads ? 120 : 80
 
-        // Draw text on canvas
-        context.fillStyle = '#ffffff'
-        context.fillRect(0, 0, canvas.width, canvas.height)
+        // Draw background with rounded corners and shadow for better visibility
+        context.fillStyle = 'rgba(255, 255, 255, 0.95)'
+        context.strokeStyle = 'rgba(79, 70, 229, 0.8)'  // Indigo border
+        context.lineWidth = 3
 
-        // Room name
-        context.font = 'Bold 20px Arial'
-        context.fillStyle = '#000000'
+        // Rounded rectangle
+        const radius = 10
+        context.beginPath()
+        context.moveTo(radius, 0)
+        context.lineTo(canvas.width - radius, 0)
+        context.quadraticCurveTo(canvas.width, 0, canvas.width, radius)
+        context.lineTo(canvas.width, canvas.height - radius)
+        context.quadraticCurveTo(canvas.width, canvas.height, canvas.width - radius, canvas.height)
+        context.lineTo(radius, canvas.height)
+        context.quadraticCurveTo(0, canvas.height, 0, canvas.height - radius)
+        context.lineTo(0, radius)
+        context.quadraticCurveTo(0, 0, radius, 0)
+        context.closePath()
+        context.fill()
+        context.stroke()
+
+        // Room name - Always shown and prominent
+        context.font = 'Bold 24px Arial'
+        context.fillStyle = '#1e293b'  // Dark slate
         context.textAlign = 'center'
         context.textBaseline = 'middle'
-        context.fillText(room.name, canvas.width / 2, showLoads ? 20 : canvas.height / 2)
+        context.fillText(room.name, canvas.width / 2, showLoads ? 25 : canvas.height / 2)
 
         // Load values if requested
         if (showLoads && (room.cooling_load !== undefined || room.heating_load !== undefined)) {
-          context.font = '16px Arial'
+          context.font = 'Bold 18px Arial'
+          let yOffset = 55
           if (room.cooling_load !== undefined) {
             context.fillStyle = '#2563eb'  // Blue for cooling
             const coolingText = `❄️ ${(room.cooling_load / 1000).toFixed(1)} kW`
-            context.fillText(coolingText, canvas.width / 2, 48)
+            context.fillText(coolingText, canvas.width / 2, yOffset)
+            yOffset += 30
           }
           if (room.heating_load !== undefined) {
             context.fillStyle = '#dc2626'  // Red for heating
             const heatingText = `🔥 ${(room.heating_load / 1000).toFixed(1)} kW`
-            context.fillText(heatingText, canvas.width / 2, 72)
+            context.fillText(heatingText, canvas.width / 2, yOffset)
           }
         }
 
@@ -179,19 +199,20 @@ export default function OBJViewer({ objContent, rooms = [], width = 600, height 
         const spriteMaterial = new THREE.SpriteMaterial({
           map: texture,
           transparent: true,
+          depthTest: false,  // Always visible on top
         })
         const sprite = new THREE.Sprite(spriteMaterial)
 
-        // Position sprite at center of room, slightly above floor
+        // Position sprite at center of room, significantly above floor for visibility
         sprite.position.set(
           room.x + room.width / 2,
-          room.z + room.height * 0.9,
+          room.z + room.height * 1.2,  // Higher up for better visibility
           room.y + room.depth / 2
         )
 
-        // Scale sprite based on room size
-        const labelScale = Math.min(room.width, room.depth) * 0.4
-        const labelHeight = showLoads ? 0.375 : 0.25  // Taller labels when showing loads
+        // Scale sprite based on room size - make it larger for better readability
+        const labelScale = Math.min(room.width, room.depth) * 0.6  // Increased from 0.4
+        const labelHeight = showLoads ? 0.4 : 0.267  // Taller labels when showing loads
         sprite.scale.set(labelScale, labelScale * labelHeight, 1)
 
         scene.add(sprite)
@@ -240,7 +261,7 @@ export default function OBJViewer({ objContent, rooms = [], width = 600, height 
         containerRef.current.removeChild(renderer.domElement)
       }
     }
-  }, [objContent, width, height, rooms, showLoads])
+  }, [objContent, width, height, rooms, showLoads, showLabels])
 
   return (
     <div className="flex flex-col items-center">
