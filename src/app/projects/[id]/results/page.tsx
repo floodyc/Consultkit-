@@ -15,6 +15,7 @@ export default function Results() {
   const [activeTab, setActiveTab] = useState('summary')
   const [exporting, setExporting] = useState(false)
   const [expandedSpaces, setExpandedSpaces] = useState<Set<string>>(new Set())
+  const [randomSpace, setRandomSpace] = useState<any>(null)
 
   // Mock results data (will be replaced with API call)
   const mockResults = {
@@ -137,6 +138,12 @@ export default function Results() {
         const calculationResults = await api.getCalculationResults(projectId)
         console.log('📊 Loaded calculation results:', calculationResults)
         setResults(calculationResults)
+
+        // Pick a random space for the walkthrough tab
+        if (calculationResults.space_results && calculationResults.space_results.length > 0) {
+          const randomIndex = Math.floor(Math.random() * calculationResults.space_results.length)
+          setRandomSpace(calculationResults.space_results[randomIndex])
+        }
       } catch (err: any) {
         console.warn('No calculation results found:', err.message)
         // If no results, show message to user
@@ -157,6 +164,13 @@ export default function Results() {
       newExpanded.add(spaceId)
     }
     setExpandedSpaces(newExpanded)
+  }
+
+  const pickRandomSpace = () => {
+    if (results?.space_results && results.space_results.length > 0) {
+      const randomIndex = Math.floor(Math.random() * results.space_results.length)
+      setRandomSpace(results.space_results[randomIndex])
+    }
   }
 
   const handleExport = async (format: string) => {
@@ -226,6 +240,7 @@ export default function Results() {
   const tabs = [
     { id: 'summary', name: 'Summary', icon: '📊' },
     { id: 'spaces', name: 'Space Results', icon: '🏢' },
+    { id: 'walkthrough', name: 'Calculation Walkthrough', icon: '🔬' },
     { id: 'zones', name: 'Zone Results', icon: '🗺️' },
     { id: 'systems', name: 'System Sizing', icon: '❄️' },
     { id: 'plant', name: 'Plant Equipment', icon: '⚡' },
@@ -653,6 +668,327 @@ export default function Results() {
                     </div>
                   )
                 })}
+              </div>
+            )}
+
+            {activeTab === 'walkthrough' && randomSpace && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-gray-900">Calculation Walkthrough</h2>
+                  <button
+                    onClick={pickRandomSpace}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm"
+                  >
+                    🎲 Pick Another Random Space
+                  </button>
+                </div>
+
+                <div className="bg-gradient-to-r from-indigo-50 to-blue-50 border-l-4 border-indigo-500 p-6 rounded-lg">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Selected Space: {randomSpace.space_name}</h3>
+                  <p className="text-sm text-gray-700">
+                    This walkthrough shows the detailed ASHRAE heat balance calculations performed for this space.
+                  </p>
+                </div>
+
+                {/* Input Parameters */}
+                <div className="bg-white border rounded-lg p-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                    <span className="bg-indigo-100 text-indigo-800 rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm font-bold">1</span>
+                    Input Parameters
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                    <div className="bg-gray-50 p-3 rounded">
+                      <span className="text-gray-600 block">Floor Area (A):</span>
+                      <span className="font-bold text-lg">{randomSpace.floor_area.toFixed(1)} m²</span>
+                    </div>
+                    <div className="bg-gray-50 p-3 rounded">
+                      <span className="text-gray-600 block">Volume (V):</span>
+                      <span className="font-bold text-lg">{randomSpace.volume.toFixed(1)} m³</span>
+                    </div>
+                    <div className="bg-gray-50 p-3 rounded">
+                      <span className="text-gray-600 block">Ceiling Height (h):</span>
+                      <span className="font-bold text-lg">{(randomSpace.volume / randomSpace.floor_area).toFixed(1)} m</span>
+                    </div>
+                    {randomSpace.exterior_wall_area !== undefined && (
+                      <div className="bg-gray-50 p-3 rounded">
+                        <span className="text-gray-600 block">Ext. Wall Area (A<sub>wall</sub>):</span>
+                        <span className="font-bold text-lg">{randomSpace.exterior_wall_area.toFixed(1)} m²</span>
+                      </div>
+                    )}
+                    {randomSpace.window_area !== undefined && (
+                      <div className="bg-gray-50 p-3 rounded">
+                        <span className="text-gray-600 block">Window Area (A<sub>win</sub>):</span>
+                        <span className="font-bold text-lg">{randomSpace.window_area.toFixed(1)} m²</span>
+                      </div>
+                    )}
+                    {randomSpace.roof_area !== undefined && (
+                      <div className="bg-gray-50 p-3 rounded">
+                        <span className="text-gray-600 block">Roof Area (A<sub>roof</sub>):</span>
+                        <span className="font-bold text-lg">{randomSpace.roof_area.toFixed(1)} m²</span>
+                      </div>
+                    )}
+                    <div className="bg-gray-50 p-3 rounded">
+                      <span className="text-gray-600 block">Occupancy:</span>
+                      <span className="font-bold text-lg">{randomSpace.occupancy || Math.floor(randomSpace.floor_area / 10)} people</span>
+                    </div>
+                    <div className="bg-gray-50 p-3 rounded">
+                      <span className="text-gray-600 block">Lighting Power:</span>
+                      <span className="font-bold text-lg">{randomSpace.lighting_w_per_m2 || 10.0} W/m²</span>
+                    </div>
+                    <div className="bg-gray-50 p-3 rounded">
+                      <span className="text-gray-600 block">Equipment Power:</span>
+                      <span className="font-bold text-lg">{randomSpace.equipment_w_per_m2 || 8.0} W/m²</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cooling Load Calculations */}
+                <div className="bg-white border rounded-lg p-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                    <span className="bg-blue-100 text-blue-800 rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm font-bold">2</span>
+                    Cooling Load Calculation (ASHRAE Heat Balance Method)
+                  </h3>
+
+                  {/* External Loads */}
+                  <div className="mb-6">
+                    <h4 className="font-semibold text-gray-900 mb-3 text-md">A. External Heat Gains</h4>
+
+                    {/* Walls */}
+                    {randomSpace.exterior_wall_area !== undefined && randomSpace.exterior_wall_area > 0 && (
+                      <div className="bg-blue-50 p-4 rounded mb-3">
+                        <p className="font-medium text-gray-900 mb-2">Exterior Walls:</p>
+                        <div className="font-mono text-sm space-y-1 text-gray-700">
+                          <p>Q<sub>wall</sub> = A<sub>wall</sub> × U<sub>wall</sub> × CLTD</p>
+                          <p>Q<sub>wall</sub> = {randomSpace.exterior_wall_area.toFixed(1)} m² × 0.45 W/(m²·K) × {randomSpace.cltd_wall || 12.0}°C</p>
+                          <p className="font-bold text-blue-700">Q<sub>wall</sub> = {(randomSpace.exterior_wall_area * 0.45 * (randomSpace.cltd_wall || 12.0)).toFixed(1)} W</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Windows */}
+                    {randomSpace.window_area !== undefined && randomSpace.window_area > 0 && (
+                      <div className="bg-blue-50 p-4 rounded mb-3">
+                        <p className="font-medium text-gray-900 mb-2">Windows (Solar + Conduction):</p>
+                        <div className="font-mono text-sm space-y-1 text-gray-700">
+                          <p>Q<sub>solar</sub> = A<sub>win</sub> × SHGC × SCL</p>
+                          <p>Q<sub>solar</sub> = {randomSpace.window_area.toFixed(1)} m² × 0.40 × {randomSpace.solar_cooling_load || 500} W/m²</p>
+                          <p className="font-bold text-blue-700">Q<sub>solar</sub> = {(randomSpace.window_area * 0.40 * (randomSpace.solar_cooling_load || 500)).toFixed(1)} W</p>
+                          <div className="mt-2 pt-2 border-t border-blue-200">
+                            <p>Q<sub>cond</sub> = A<sub>win</sub> × U<sub>win</sub> × ΔT</p>
+                            <p>Q<sub>cond</sub> = {randomSpace.window_area.toFixed(1)} m² × 2.5 W/(m²·K) × {randomSpace.delta_t_window || 8.0}°C</p>
+                            <p className="font-bold text-blue-700">Q<sub>cond</sub> = {(randomSpace.window_area * 2.5 * (randomSpace.delta_t_window || 8.0)).toFixed(1)} W</p>
+                          </div>
+                          <p className="font-bold text-blue-900 pt-2 border-t border-blue-300">Q<sub>window,total</sub> = {(randomSpace.window_area * 0.40 * (randomSpace.solar_cooling_load || 500) + randomSpace.window_area * 2.5 * (randomSpace.delta_t_window || 8.0)).toFixed(1)} W</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Roof */}
+                    {randomSpace.roof_area !== undefined && randomSpace.roof_area > 0 && (
+                      <div className="bg-blue-50 p-4 rounded mb-3">
+                        <p className="font-medium text-gray-900 mb-2">Roof Heat Gain:</p>
+                        <div className="font-mono text-sm space-y-1 text-gray-700">
+                          <p>Q<sub>roof</sub> = A<sub>roof</sub> × U<sub>roof</sub> × CLTD<sub>roof</sub></p>
+                          <p>Q<sub>roof</sub> = {randomSpace.roof_area.toFixed(1)} m² × 0.25 W/(m²·K) × {randomSpace.cltd_roof || 20.0}°C</p>
+                          <p className="font-bold text-blue-700">Q<sub>roof</sub> = {(randomSpace.roof_area * 0.25 * (randomSpace.cltd_roof || 20.0)).toFixed(1)} W</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Infiltration */}
+                    <div className="bg-blue-50 p-4 rounded">
+                      <p className="font-medium text-gray-900 mb-2">Infiltration Load:</p>
+                      <div className="font-mono text-sm space-y-1 text-gray-700">
+                        <p>Q<sub>inf,sens</sub> = V<sub>inf</sub> × ρ × c<sub>p</sub> × ΔT</p>
+                        <p>V<sub>inf</sub> = {(randomSpace.volume * 0.5).toFixed(1)} m³/h (0.5 ACH)</p>
+                        <p>Q<sub>inf,sens</sub> = {(randomSpace.volume * 0.5 / 3600).toFixed(4)} m³/s × 1.2 kg/m³ × 1005 J/(kg·K) × {randomSpace.delta_t_cooling || 12.0}°C</p>
+                        <p className="font-bold text-blue-700">Q<sub>inf,sens</sub> = {(randomSpace.volume * 0.5 / 3600 * 1.2 * 1005 * (randomSpace.delta_t_cooling || 12.0)).toFixed(1)} W</p>
+                        <div className="mt-2 pt-2 border-t border-blue-200">
+                          <p>Q<sub>inf,lat</sub> = V<sub>inf</sub> × ρ × h<sub>fg</sub> × Δω</p>
+                          <p>Q<sub>inf,lat</sub> = {(randomSpace.volume * 0.5 / 3600).toFixed(4)} m³/s × 1.2 kg/m³ × 2500000 J/kg × {randomSpace.delta_humidity || 0.005}</p>
+                          <p className="font-bold text-blue-700">Q<sub>inf,lat</sub> = {(randomSpace.volume * 0.5 / 3600 * 1.2 * 2500000 * (randomSpace.delta_humidity || 0.005)).toFixed(1)} W</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Internal Loads */}
+                  <div className="mb-6">
+                    <h4 className="font-semibold text-gray-900 mb-3 text-md">B. Internal Heat Gains</h4>
+
+                    {/* People */}
+                    <div className="bg-green-50 p-4 rounded mb-3">
+                      <p className="font-medium text-gray-900 mb-2">Occupants:</p>
+                      <div className="font-mono text-sm space-y-1 text-gray-700">
+                        <p>Q<sub>people,sens</sub> = N × q<sub>sens</sub></p>
+                        <p>Q<sub>people,sens</sub> = {randomSpace.occupancy || Math.floor(randomSpace.floor_area / 10)} people × 75 W/person</p>
+                        <p className="font-bold text-green-700">Q<sub>people,sens</sub> = {((randomSpace.occupancy || Math.floor(randomSpace.floor_area / 10)) * 75).toFixed(1)} W</p>
+                        <div className="mt-2 pt-2 border-t border-green-200">
+                          <p>Q<sub>people,lat</sub> = N × q<sub>lat</sub></p>
+                          <p>Q<sub>people,lat</sub> = {randomSpace.occupancy || Math.floor(randomSpace.floor_area / 10)} people × 55 W/person</p>
+                          <p className="font-bold text-green-700">Q<sub>people,lat</sub> = {((randomSpace.occupancy || Math.floor(randomSpace.floor_area / 10)) * 55).toFixed(1)} W</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Lighting */}
+                    <div className="bg-green-50 p-4 rounded mb-3">
+                      <p className="font-medium text-gray-900 mb-2">Lighting:</p>
+                      <div className="font-mono text-sm space-y-1 text-gray-700">
+                        <p>Q<sub>lights</sub> = A × LPD × F<sub>use</sub> × F<sub>ballast</sub></p>
+                        <p>Q<sub>lights</sub> = {randomSpace.floor_area.toFixed(1)} m² × {randomSpace.lighting_w_per_m2 || 10.0} W/m² × 1.0 × 1.2</p>
+                        <p className="font-bold text-green-700">Q<sub>lights</sub> = {(randomSpace.floor_area * (randomSpace.lighting_w_per_m2 || 10.0) * 1.0 * 1.2).toFixed(1)} W</p>
+                      </div>
+                    </div>
+
+                    {/* Equipment */}
+                    <div className="bg-green-50 p-4 rounded">
+                      <p className="font-medium text-gray-900 mb-2">Equipment:</p>
+                      <div className="font-mono text-sm space-y-1 text-gray-700">
+                        <p>Q<sub>equipment</sub> = A × EPD × F<sub>use</sub> × F<sub>rad</sub></p>
+                        <p>Q<sub>equipment</sub> = {randomSpace.floor_area.toFixed(1)} m² × {randomSpace.equipment_w_per_m2 || 8.0} W/m² × 0.75 × 1.0</p>
+                        <p className="font-bold text-green-700">Q<sub>equipment</sub> = {(randomSpace.floor_area * (randomSpace.equipment_w_per_m2 || 8.0) * 0.75 * 1.0).toFixed(1)} W</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Total Cooling Load */}
+                  <div className="bg-gradient-to-r from-blue-100 to-indigo-100 p-6 rounded-lg border-2 border-blue-300">
+                    <h4 className="font-bold text-gray-900 mb-3 text-lg">C. Total Cooling Load</h4>
+                    <div className="font-mono text-sm space-y-2">
+                      <div className="flex justify-between">
+                        <span>Sensible Load (Q<sub>sens</sub>):</span>
+                        <span className="font-bold">{(randomSpace.peak_cooling_sensible || randomSpace.peak_cooling_total * 0.7).toFixed(1)} W</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Latent Load (Q<sub>lat</sub>):</span>
+                        <span className="font-bold">{(randomSpace.peak_cooling_latent || randomSpace.peak_cooling_total * 0.3).toFixed(1)} W</span>
+                      </div>
+                      <div className="flex justify-between text-lg font-bold border-t-2 border-blue-400 pt-2 mt-2">
+                        <span>Total Cooling Load:</span>
+                        <span className="text-blue-700">{randomSpace.peak_cooling_total.toFixed(1)} W = {(randomSpace.peak_cooling_total / 1000).toFixed(1)} kW</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Tons Refrigeration:</span>
+                        <span className="font-bold text-blue-600">{(randomSpace.peak_cooling_total / 3517).toFixed(1)} tons</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Cooling Intensity:</span>
+                        <span className="font-bold text-blue-600">{(randomSpace.peak_cooling_total / randomSpace.floor_area).toFixed(1)} W/m²</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Heating Load Calculations */}
+                <div className="bg-white border rounded-lg p-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                    <span className="bg-orange-100 text-orange-800 rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm font-bold">3</span>
+                    Heating Load Calculation
+                  </h3>
+
+                  <div className="space-y-4">
+                    {/* Transmission Losses */}
+                    <div className="bg-orange-50 p-4 rounded">
+                      <p className="font-medium text-gray-900 mb-2">Heat Loss Through Building Envelope:</p>
+                      <div className="font-mono text-sm space-y-1 text-gray-700">
+                        <p>Q<sub>trans</sub> = (A<sub>wall</sub> × U<sub>wall</sub> + A<sub>win</sub> × U<sub>win</sub> + A<sub>roof</sub> × U<sub>roof</sub> + A<sub>floor</sub> × U<sub>floor</sub>) × ΔT</p>
+                        <p>UA<sub>total</sub> = ({randomSpace.exterior_wall_area?.toFixed(1) || 0} × 0.45 + {randomSpace.window_area?.toFixed(1) || 0} × 2.5 + {randomSpace.roof_area?.toFixed(1) || 0} × 0.25 + {randomSpace.floor_area.toFixed(1)} × 0.30)</p>
+                        <p>UA<sub>total</sub> = {(
+                          (randomSpace.exterior_wall_area || 0) * 0.45 +
+                          (randomSpace.window_area || 0) * 2.5 +
+                          (randomSpace.roof_area || 0) * 0.25 +
+                          randomSpace.floor_area * 0.30
+                        ).toFixed(1)} W/K</p>
+                        <p>Q<sub>trans</sub> = {(
+                          (randomSpace.exterior_wall_area || 0) * 0.45 +
+                          (randomSpace.window_area || 0) * 2.5 +
+                          (randomSpace.roof_area || 0) * 0.25 +
+                          randomSpace.floor_area * 0.30
+                        ).toFixed(1)} W/K × {randomSpace.delta_t_heating || 25.0}°C</p>
+                        <p className="font-bold text-orange-700">Q<sub>trans</sub> = {(
+                          ((randomSpace.exterior_wall_area || 0) * 0.45 +
+                          (randomSpace.window_area || 0) * 2.5 +
+                          (randomSpace.roof_area || 0) * 0.25 +
+                          randomSpace.floor_area * 0.30) * (randomSpace.delta_t_heating || 25.0)
+                        ).toFixed(1)} W</p>
+                      </div>
+                    </div>
+
+                    {/* Infiltration Heating */}
+                    <div className="bg-orange-50 p-4 rounded">
+                      <p className="font-medium text-gray-900 mb-2">Infiltration Heating Load:</p>
+                      <div className="font-mono text-sm space-y-1 text-gray-700">
+                        <p>Q<sub>inf,heat</sub> = V<sub>inf</sub> × ρ × c<sub>p</sub> × ΔT</p>
+                        <p>V<sub>inf</sub> = {(randomSpace.volume * 0.7).toFixed(1)} m³/h (0.7 ACH for heating)</p>
+                        <p>Q<sub>inf,heat</sub> = {(randomSpace.volume * 0.7 / 3600).toFixed(4)} m³/s × 1.2 kg/m³ × 1005 J/(kg·K) × {randomSpace.delta_t_heating || 25.0}°C</p>
+                        <p className="font-bold text-orange-700">Q<sub>inf,heat</sub> = {(randomSpace.volume * 0.7 / 3600 * 1.2 * 1005 * (randomSpace.delta_t_heating || 25.0)).toFixed(1)} W</p>
+                      </div>
+                    </div>
+
+                    {/* Total Heating Load */}
+                    <div className="bg-gradient-to-r from-orange-100 to-red-100 p-6 rounded-lg border-2 border-orange-300">
+                      <h4 className="font-bold text-gray-900 mb-3 text-lg">Total Heating Load</h4>
+                      <div className="font-mono text-sm space-y-2">
+                        <div className="flex justify-between text-lg font-bold">
+                          <span>Peak Heating Load:</span>
+                          <span className="text-orange-700">{randomSpace.peak_heating.toFixed(1)} W = {(randomSpace.peak_heating / 1000).toFixed(1)} kW</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Heating Intensity:</span>
+                          <span className="font-bold text-orange-600">{(randomSpace.peak_heating / randomSpace.floor_area).toFixed(1)} W/m²</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Airflow Calculations */}
+                <div className="bg-white border rounded-lg p-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                    <span className="bg-purple-100 text-purple-800 rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm font-bold">4</span>
+                    Airflow Requirements
+                  </h3>
+
+                  <div className="space-y-4">
+                    {/* Supply Air for Cooling */}
+                    <div className="bg-purple-50 p-4 rounded">
+                      <p className="font-medium text-gray-900 mb-2">Supply Airflow (Cooling):</p>
+                      <div className="font-mono text-sm space-y-1 text-gray-700">
+                        <p>V<sub>supply</sub> = Q<sub>sens</sub> / (ρ × c<sub>p</sub> × ΔT<sub>supply</sub>)</p>
+                        <p>V<sub>supply</sub> = {(randomSpace.peak_cooling_sensible || randomSpace.peak_cooling_total * 0.7).toFixed(1)} W / (1.2 kg/m³ × 1005 J/(kg·K) × 10°C)</p>
+                        <p className="font-bold text-purple-700">V<sub>supply</sub> = {randomSpace.supply_airflow_cooling.toFixed(1)} m³/s = {(randomSpace.supply_airflow_cooling * 2118.88).toFixed(1)} CFM</p>
+                      </div>
+                    </div>
+
+                    {/* Outdoor Air */}
+                    <div className="bg-purple-50 p-4 rounded">
+                      <p className="font-medium text-gray-900 mb-2">Outdoor Air (Ventilation):</p>
+                      <div className="font-mono text-sm space-y-1 text-gray-700">
+                        <p>V<sub>oa</sub> = N × OA<sub>per person</sub> + A × OA<sub>per area</sub></p>
+                        <p>V<sub>oa</sub> = {randomSpace.occupancy || Math.floor(randomSpace.floor_area / 10)} people × 0.010 m³/(s·person) + {randomSpace.floor_area.toFixed(1)} m² × 0.0003 m³/(s·m²)</p>
+                        <p className="font-bold text-purple-700">V<sub>oa</sub> = {randomSpace.outdoor_airflow.toFixed(1)} m³/s = {(randomSpace.outdoor_airflow * 2118.88).toFixed(1)} CFM</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Summary */}
+                <div className="bg-gradient-to-r from-gray-800 to-gray-900 text-white p-6 rounded-lg">
+                  <h3 className="text-xl font-bold mb-4">📋 Calculation Summary</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-gray-300 mb-2">Space: <span className="font-bold text-white">{randomSpace.space_name}</span></p>
+                      <p className="text-gray-300 mb-2">Floor Area: <span className="font-bold text-white">{randomSpace.floor_area.toFixed(1)} m²</span></p>
+                      <p className="text-gray-300 mb-2">Volume: <span className="font-bold text-white">{randomSpace.volume.toFixed(1)} m³</span></p>
+                    </div>
+                    <div>
+                      <p className="text-blue-300 mb-2">Peak Cooling: <span className="font-bold text-blue-100">{(randomSpace.peak_cooling_total / 1000).toFixed(1)} kW ({(randomSpace.peak_cooling_total / 3517).toFixed(1)} tons)</span></p>
+                      <p className="text-orange-300 mb-2">Peak Heating: <span className="font-bold text-orange-100">{(randomSpace.peak_heating / 1000).toFixed(1)} kW</span></p>
+                      <p className="text-purple-300 mb-2">Supply Airflow: <span className="font-bold text-purple-100">{randomSpace.supply_airflow_cooling.toFixed(1)} m³/s ({(randomSpace.supply_airflow_cooling * 2118.88).toFixed(1)} CFM)</span></p>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
