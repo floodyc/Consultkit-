@@ -410,6 +410,14 @@ async def apply_extraction_to_project(
     # Store extraction result for persistence (so it's available when user returns to page)
     project["extraction_result"] = extraction_result.model_dump()
 
+    # Save floorplan URL (path to uploaded file)
+    upload_dir = os.path.join(settings.UPLOAD_DIR, project_id)
+    for ext in [".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp", ".pdf"]:
+        potential_path = os.path.join(upload_dir, f"{extraction_result.file_id}{ext}")
+        if os.path.exists(potential_path):
+            project["floorplan_url"] = f"/api/v1/files/{project_id}/{extraction_result.file_id}{ext}"
+            break
+
     return {
         "message": f"Applied {len(spaces)} spaces to project",
         "total_area_m2": extraction_result.total_area_m2,

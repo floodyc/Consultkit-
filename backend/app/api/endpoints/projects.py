@@ -49,6 +49,9 @@ class ProjectUpdate(BaseModel):
     unit_system: Optional[str] = None
     weather_data: Optional[dict] = None
     design_conditions: Optional[dict] = None
+    settings: Optional[dict] = None
+    floorplan_url: Optional[str] = None
+    obj_url: Optional[str] = None
 
 
 class SpaceData(BaseModel):
@@ -86,26 +89,30 @@ class SpaceData(BaseModel):
 class ProjectResponse(BaseModel):
     id: str
     name: str
-    description: Optional[str]
-    project_number: Optional[str]
-    client_name: Optional[str]
-    address: Optional[str]
-    city: Optional[str]
-    state: Optional[str]
-    country: Optional[str]
-    latitude: Optional[float]
-    longitude: Optional[float]
+    description: Optional[str] = None
+    project_number: Optional[str] = None
+    client_name: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    country: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     building_type: str
-    total_floor_area: Optional[float]
+    total_floor_area: Optional[float] = None
     num_floors: int
     status: str
     calculation_method: str
     unit_system: str
     created_at: datetime
     updated_at: datetime
-    calculated_at: Optional[datetime]
+    calculated_at: Optional[datetime] = None
     credits_used: int
     num_spaces: int = 0
+    settings: Optional[dict] = None
+    floorplan_url: Optional[str] = None
+    obj_url: Optional[str] = None
+    extraction_result: Optional[dict] = None
 
     class Config:
         from_attributes = True
@@ -162,6 +169,10 @@ async def create_project(
         "status": "draft",
         "calculation_method": project_data.calculation_method,
         "unit_system": project_data.unit_system,
+        "settings": None,
+        "floorplan_url": None,
+        "obj_url": None,
+        "extraction_result": None,
         "created_at": now,
         "updated_at": now,
         "calculated_at": None,

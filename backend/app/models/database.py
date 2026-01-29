@@ -91,6 +91,13 @@ class Project(Base):
     weather_data = Column(JSON)
     design_conditions = Column(JSON)
 
+    # Project settings (envelope, HVAC, calculation params)
+    settings = Column(JSON)
+
+    # Floorplan/geometry data
+    floorplan_url = Column(String(500))  # URL to floorplan image
+    obj_url = Column(String(500))  # URL to 3D OBJ file
+
     # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
