@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { api } from '@/lib/api'
+import IESLogo from '@/components/IESLogo'
 
 export default function ProjectSettings() {
   const router = useRouter()
@@ -13,6 +14,17 @@ export default function ProjectSettings() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('general')
   const [saving, setSaving] = useState(false)
+
+  // General Project Info State
+  const [generalInfo, setGeneralInfo] = useState({
+    name: '',
+    project_number: '',
+    building_type: 'office',
+    num_floors: 1,
+    description: '',
+    client_name: '',
+    unit_system: 'SI',
+  })
 
   // Building Envelope State
   const [envelope, setEnvelope] = useState({
@@ -93,8 +105,33 @@ export default function ProjectSettings() {
     try {
       const data = await api.getProject(projectId)
       setProject(data)
-      // Load saved settings if they exist
-      // ... populate state from project data
+
+      // Load general project info
+      setGeneralInfo({
+        name: data.name || '',
+        project_number: data.project_number || '',
+        building_type: data.building_type || 'office',
+        num_floors: data.num_floors || 1,
+        description: data.description || '',
+        client_name: data.client_name || '',
+        unit_system: data.unit_system || 'SI',
+      })
+
+      // Load saved settings if they exist in project.settings
+      if (data.settings) {
+        if (data.settings.envelope) {
+          setEnvelope({ ...envelope, ...data.settings.envelope })
+        }
+        if (data.settings.hvac_system) {
+          setHvacSystem({ ...hvacSystem, ...data.settings.hvac_system })
+        }
+        if (data.settings.design_conditions) {
+          setDesignConditions({ ...designConditions, ...data.settings.design_conditions })
+        }
+        if (data.settings.calculation_params) {
+          setCalcParams({ ...calcParams, ...data.settings.calculation_params })
+        }
+      }
     } catch (err) {
       router.push('/dashboard')
     } finally {
@@ -105,8 +142,22 @@ export default function ProjectSettings() {
   const handleSave = async () => {
     setSaving(true)
     try {
-      // TODO: API call to save settings
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Save general info and all settings
+      await api.updateProject(projectId, {
+        name: generalInfo.name,
+        project_number: generalInfo.project_number,
+        building_type: generalInfo.building_type,
+        num_floors: generalInfo.num_floors,
+        description: generalInfo.description,
+        client_name: generalInfo.client_name,
+        unit_system: generalInfo.unit_system,
+        settings: {
+          envelope,
+          hvac_system: hvacSystem,
+          design_conditions: designConditions,
+          calculation_params: calcParams,
+        }
+      })
       alert('Settings saved successfully!')
     } catch (err: any) {
       alert(err.message || 'Failed to save settings')
@@ -147,13 +198,16 @@ export default function ProjectSettings() {
                 Project Settings: {project?.name}
               </h1>
             </div>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
-            >
-              {saving ? 'Saving...' : '💾 Save Settings'}
-            </button>
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+              >
+                {saving ? 'Saving...' : '💾 Save Settings'}
+              </button>
+              <IESLogo />
+            </div>
           </div>
         </div>
       </nav>
@@ -164,19 +218,19 @@ export default function ProjectSettings() {
           <nav className="flex space-x-8" aria-label="Tabs">
             <button
               onClick={() => router.push(`/projects/${projectId}`)}
-              className="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              className="border-b-4 border-transparent py-5 px-2 text-lg font-semibold text-gray-500 hover:text-gray-700 hover:border-gray-300"
             >
               Overview
             </button>
             <button
               onClick={() => router.push(`/projects/${projectId}/settings`)}
-              className="border-b-2 border-indigo-500 py-4 px-1 text-sm font-medium text-indigo-600"
+              className="border-b-4 border-indigo-500 py-5 px-2 text-lg font-bold text-indigo-600"
             >
               Settings
             </button>
             <button
               onClick={() => router.push(`/projects/${projectId}/results`)}
-              className="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              className="border-b-4 border-transparent py-5 px-2 text-lg font-semibold text-gray-500 hover:text-gray-700 hover:border-gray-300"
             >
               Results
             </button>
@@ -219,7 +273,8 @@ export default function ProjectSettings() {
                     </label>
                     <input
                       type="text"
-                      defaultValue={project?.name}
+                      value={generalInfo.name}
+                      onChange={(e) => setGeneralInfo({...generalInfo, name: e.target.value})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                     />
                   </div>
@@ -230,7 +285,8 @@ export default function ProjectSettings() {
                     </label>
                     <input
                       type="text"
-                      defaultValue={project?.project_number || ''}
+                      value={generalInfo.project_number}
+                      onChange={(e) => setGeneralInfo({...generalInfo, project_number: e.target.value})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                     />
                   </div>
@@ -240,7 +296,8 @@ export default function ProjectSettings() {
                       Building Type
                     </label>
                     <select
-                      defaultValue={project?.building_type}
+                      value={generalInfo.building_type}
+                      onChange={(e) => setGeneralInfo({...generalInfo, building_type: e.target.value})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                     >
                       <option value="office">Office</option>
@@ -260,7 +317,8 @@ export default function ProjectSettings() {
                     </label>
                     <input
                       type="number"
-                      defaultValue={project?.num_floors || 1}
+                      value={generalInfo.num_floors}
+                      onChange={(e) => setGeneralInfo({...generalInfo, num_floors: parseInt(e.target.value) || 1})}
                       min="1"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                     />
@@ -271,7 +329,8 @@ export default function ProjectSettings() {
                       Description
                     </label>
                     <textarea
-                      defaultValue={project?.description}
+                      value={generalInfo.description}
+                      onChange={(e) => setGeneralInfo({...generalInfo, description: e.target.value})}
                       rows={3}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                     />
@@ -283,7 +342,8 @@ export default function ProjectSettings() {
                     </label>
                     <input
                       type="text"
-                      defaultValue={project?.client_name || ''}
+                      value={generalInfo.client_name}
+                      onChange={(e) => setGeneralInfo({...generalInfo, client_name: e.target.value})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                     />
                   </div>
@@ -293,7 +353,8 @@ export default function ProjectSettings() {
                       Unit System
                     </label>
                     <select
-                      defaultValue={project?.unit_system || 'SI'}
+                      value={generalInfo.unit_system}
+                      onChange={(e) => setGeneralInfo({...generalInfo, unit_system: e.target.value})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                     >
                       <option value="SI">SI (Metric)</option>

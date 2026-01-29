@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { api } from '@/lib/api'
+import IESLogo from '@/components/IESLogo'
 
 export default function Results() {
   const router = useRouter()
@@ -288,6 +289,8 @@ export default function Results() {
               >
                 📐 gbXML
               </button>
+              <div className="h-8 w-px bg-gray-300"></div>
+              <IESLogo />
             </div>
           </div>
         </div>
@@ -299,19 +302,19 @@ export default function Results() {
           <nav className="flex space-x-8" aria-label="Tabs">
             <button
               onClick={() => router.push(`/projects/${projectId}`)}
-              className="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              className="border-b-4 border-transparent py-5 px-2 text-lg font-semibold text-gray-500 hover:text-gray-700 hover:border-gray-300"
             >
               Overview
             </button>
             <button
               onClick={() => router.push(`/projects/${projectId}/settings`)}
-              className="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              className="border-b-4 border-transparent py-5 px-2 text-lg font-semibold text-gray-500 hover:text-gray-700 hover:border-gray-300"
             >
               Settings
             </button>
             <button
               onClick={() => router.push(`/projects/${projectId}/results`)}
-              className="border-b-2 border-indigo-500 py-4 px-1 text-sm font-medium text-indigo-600"
+              className="border-b-4 border-indigo-500 py-5 px-2 text-lg font-bold text-indigo-600"
             >
               Results
             </button>

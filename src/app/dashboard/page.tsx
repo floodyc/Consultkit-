@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { api } from '@/lib/api'
+import IESLogo from '@/components/IESLogo'
 
 export default function Dashboard() {
   const router = useRouter()
@@ -138,6 +139,7 @@ export default function Dashboard() {
               >
                 Logout
               </button>
+              <IESLogo />
             </div>
           </div>
         </div>
