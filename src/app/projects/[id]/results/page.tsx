@@ -247,7 +247,7 @@ export default function Results() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-lg border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20 items-center">
@@ -417,193 +417,144 @@ export default function Results() {
                 </div>
 
                 {/* Key Metrics */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 shadow-lg transform transition hover:scale-105">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="bg-blue-50 rounded-lg p-5 shadow border border-blue-100">
                     <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm text-blue-100 font-semibold uppercase tracking-wide">Floor Area</p>
-                      <span className="text-2xl">📐</span>
+                      <p className="text-xs text-blue-700 font-semibold uppercase tracking-wide">Floor Area</p>
+                      <span className="text-xl">📐</span>
                     </div>
-                    <p className="text-4xl font-bold text-white mt-3">
+                    <p className="text-3xl font-bold text-blue-800 mt-2">
                       {results.building_summary.total_floor_area.toFixed(1)}
                     </p>
-                    <p className="text-sm text-blue-100 mt-1">m²</p>
+                    <p className="text-xs text-blue-600 mt-1">m²</p>
                   </div>
 
-                  <div className="bg-gradient-to-br from-cyan-500 to-blue-500 rounded-xl p-6 shadow-lg transform transition hover:scale-105">
+                  <div className="bg-cyan-50 rounded-lg p-5 shadow border border-cyan-100">
                     <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm text-cyan-100 font-semibold uppercase tracking-wide">Peak Cooling</p>
-                      <span className="text-2xl">❄️</span>
+                      <p className="text-xs text-cyan-700 font-semibold uppercase tracking-wide">Peak Cooling</p>
+                      <span className="text-xl">❄️</span>
                     </div>
-                    <p className="text-4xl font-bold text-white mt-3">
+                    <p className="text-3xl font-bold text-cyan-800 mt-2">
                       {(results.building_summary.peak_cooling_total / 1000).toFixed(1)}
                     </p>
-                    <p className="text-sm text-cyan-100 mt-1">kW ({(results.building_summary.peak_cooling_total / 3517).toFixed(1)} tons)</p>
+                    <p className="text-xs text-cyan-600 mt-1">kW ({(results.building_summary.peak_cooling_total / 3517).toFixed(1)} tons)</p>
                   </div>
 
-                  <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-xl p-6 shadow-lg transform transition hover:scale-105">
+                  <div className="bg-orange-50 rounded-lg p-5 shadow border border-orange-100">
                     <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm text-orange-100 font-semibold uppercase tracking-wide">Peak Heating</p>
-                      <span className="text-2xl">🔥</span>
+                      <p className="text-xs text-orange-700 font-semibold uppercase tracking-wide">Peak Heating</p>
+                      <span className="text-xl">🔥</span>
                     </div>
-                    <p className="text-4xl font-bold text-white mt-3">
+                    <p className="text-3xl font-bold text-orange-800 mt-2">
                       {(results.building_summary.peak_heating / 1000).toFixed(1)}
                     </p>
-                    <p className="text-sm text-orange-100 mt-1">kW</p>
+                    <p className="text-xs text-orange-600 mt-1">kW</p>
                   </div>
 
-                  <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-6 shadow-lg transform transition hover:scale-105">
+                  <div className="bg-green-50 rounded-lg p-5 shadow border border-green-100">
                     <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm text-green-100 font-semibold uppercase tracking-wide">Intensity</p>
-                      <span className="text-2xl">⚡</span>
+                      <p className="text-xs text-green-700 font-semibold uppercase tracking-wide">Intensity</p>
+                      <span className="text-xl">⚡</span>
                     </div>
-                    <p className="text-4xl font-bold text-white mt-3">
+                    <p className="text-3xl font-bold text-green-800 mt-2">
                       {results.building_summary.cooling_w_per_m2.toFixed(1)}
                     </p>
-                    <p className="text-sm text-green-100 mt-1">W/m²</p>
+                    <p className="text-xs text-green-600 mt-1">W/m²</p>
                   </div>
                 </div>
 
-                {/* Load Comparison Bar Charts */}
-                <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                    <span className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg p-2 mr-3">📊</span>
-                    Load Distribution by Space
+                {/* Load Comparison Table */}
+                <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                  <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <span className="bg-indigo-100 text-indigo-700 rounded-lg p-2 mr-3">📊</span>
+                    Load Breakdown by Space
                   </h3>
-                  <div className="space-y-4">
-                    {results.space_results.map((space: any, idx: number) => {
-                      const maxLoad = Math.max(
-                        ...results.space_results.map((s: any) => Math.max(s.peak_cooling_total, s.peak_heating))
-                      )
-                      const coolingPercent = (space.peak_cooling_total / maxLoad) * 100
-                      const heatingPercent = (space.peak_heating / maxLoad) * 100
-
-                      return (
-                        <div key={idx} className="group hover:bg-gray-50 p-4 rounded-lg transition-colors">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
-                              {space.space_name}
-                            </span>
-                            <div className="flex gap-4 text-sm">
-                              <span className="text-cyan-600 font-medium">
-                                ❄️ {(space.peak_cooling_total / 1000).toFixed(1)} kW
-                              </span>
-                              <span className="text-orange-600 font-medium">
-                                🔥 {(space.peak_heating / 1000).toFixed(1)} kW
-                              </span>
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            {/* Cooling Bar */}
-                            <div className="relative h-6 bg-gray-100 rounded-full overflow-hidden">
-                              <div
-                                className="absolute h-full bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full transition-all duration-500 ease-out flex items-center justify-end pr-2"
-                                style={{ width: `${coolingPercent}%` }}
-                              >
-                                {coolingPercent > 15 && (
-                                  <span className="text-xs font-bold text-white">Cooling</span>
-                                )}
-                              </div>
-                            </div>
-                            {/* Heating Bar */}
-                            <div className="relative h-6 bg-gray-100 rounded-full overflow-hidden">
-                              <div
-                                className="absolute h-full bg-gradient-to-r from-orange-400 to-red-500 rounded-full transition-all duration-500 ease-out flex items-center justify-end pr-2"
-                                style={{ width: `${heatingPercent}%` }}
-                              >
-                                {heatingPercent > 15 && (
-                                  <span className="text-xs font-bold text-white">Heating</span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-
-                {/* Total Loads Comparison */}
-                <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                    <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg p-2 mr-3">🎯</span>
-                    Total Building Loads
-                  </h3>
-                  <div className="space-y-6">
-                    {/* Total Cooling */}
-                    <div>
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-lg font-semibold text-gray-900">Total Cooling Load</span>
-                        <span className="text-2xl font-bold text-cyan-600">
-                          {(results.building_summary.peak_cooling_total / 1000).toFixed(1)} kW
-                        </span>
-                      </div>
-                      <div className="relative h-12 bg-gray-100 rounded-xl overflow-hidden shadow-inner">
-                        <div
-                          className="absolute h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 rounded-xl flex items-center justify-center transition-all duration-1000 ease-out"
-                          style={{ width: '100%' }}
-                        >
-                          <span className="text-white font-bold text-sm">
-                            {(results.building_summary.peak_cooling_total / 3517).toFixed(1)} tons refrigeration
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Total Heating */}
-                    <div>
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-lg font-semibold text-gray-900">Total Heating Load</span>
-                        <span className="text-2xl font-bold text-orange-600">
-                          {(results.building_summary.peak_heating / 1000).toFixed(1)} kW
-                        </span>
-                      </div>
-                      <div className="relative h-12 bg-gray-100 rounded-xl overflow-hidden shadow-inner">
-                        <div
-                          className="absolute h-full bg-gradient-to-r from-orange-400 via-red-500 to-pink-600 rounded-xl flex items-center justify-center transition-all duration-1000 ease-out"
-                          style={{ width: `${(results.building_summary.peak_heating / results.building_summary.peak_cooling_total) * 100}%` }}
-                        >
-                          <span className="text-white font-bold text-sm">
-                            {((results.building_summary.peak_heating / results.building_summary.peak_cooling_total) * 100).toFixed(1)}% of cooling
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Space Name</th>
+                          <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Area (m²)</th>
+                          <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Cooling (kW)</th>
+                          <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Heating (kW)</th>
+                          <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">W/m² Cooling</th>
+                          <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">W/m² Heating</th>
+                          <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Airflow (m³/s)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {results.space_results.map((space: any, idx: number) => (
+                          <tr key={idx} className="hover:bg-gray-50">
+                            <td className="px-4 py-3 text-sm font-medium text-gray-800">{space.space_name}</td>
+                            <td className="px-4 py-3 text-sm text-gray-700 text-right">{space.floor_area.toFixed(1)}</td>
+                            <td className="px-4 py-3 text-sm font-semibold text-cyan-700 text-right">{(space.peak_cooling_total / 1000).toFixed(1)}</td>
+                            <td className="px-4 py-3 text-sm font-semibold text-orange-700 text-right">{(space.peak_heating / 1000).toFixed(1)}</td>
+                            <td className="px-4 py-3 text-sm text-gray-700 text-right">{space.cooling_w_per_m2?.toFixed(1) || (space.peak_cooling_total / space.floor_area).toFixed(1)}</td>
+                            <td className="px-4 py-3 text-sm text-gray-700 text-right">{space.heating_w_per_m2?.toFixed(1) || (space.peak_heating / space.floor_area).toFixed(1)}</td>
+                            <td className="px-4 py-3 text-sm text-gray-700 text-right">{space.supply_airflow_cooling.toFixed(1)}</td>
+                          </tr>
+                        ))}
+                        <tr className="bg-gray-100 font-semibold">
+                          <td className="px-4 py-3 text-sm text-gray-900">TOTAL</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 text-right">{results.building_summary.total_floor_area.toFixed(1)}</td>
+                          <td className="px-4 py-3 text-sm text-cyan-800 text-right">{(results.building_summary.peak_cooling_total / 1000).toFixed(1)}</td>
+                          <td className="px-4 py-3 text-sm text-orange-800 text-right">{(results.building_summary.peak_heating / 1000).toFixed(1)}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 text-right">{results.building_summary.cooling_w_per_m2.toFixed(1)}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 text-right">{results.building_summary.heating_w_per_m2?.toFixed(1) || (results.building_summary.peak_heating / results.building_summary.total_floor_area).toFixed(1)}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 text-right">—</td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
 
                 {/* Load Components */}
-                <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                    <span className="bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-lg p-2 mr-3">📋</span>
+                <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                  <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <span className="bg-gray-100 text-gray-700 rounded-lg p-2 mr-3">📋</span>
                     Load Component Breakdown
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {/* Sensible Cooling */}
-                    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-200">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-bold text-blue-900 uppercase tracking-wide">Sensible Cooling</span>
-                        <span className="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded-full">
+                    <div className="bg-blue-50 rounded-lg p-5 border border-blue-100">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-semibold text-blue-800 uppercase tracking-wide">Sensible Cooling</span>
+                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
                           {((results.building_summary.peak_cooling_sensible / results.building_summary.peak_cooling_total) * 100).toFixed(1)}%
                         </span>
                       </div>
-                      <p className="text-3xl font-bold text-blue-600">
+                      <p className="text-2xl font-bold text-blue-700">
                         {(results.building_summary.peak_cooling_sensible / 1000).toFixed(1)}
                       </p>
-                      <p className="text-sm text-blue-700 mt-1">kW</p>
+                      <p className="text-xs text-blue-600 mt-1">kW</p>
                     </div>
 
                     {/* Latent Cooling */}
-                    <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-6 border border-purple-200">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-bold text-purple-900 uppercase tracking-wide">Latent Cooling</span>
-                        <span className="text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded-full">
+                    <div className="bg-cyan-50 rounded-lg p-5 border border-cyan-100">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-semibold text-cyan-800 uppercase tracking-wide">Latent Cooling</span>
+                        <span className="text-xs bg-cyan-100 text-cyan-700 px-2 py-1 rounded">
                           {((results.building_summary.peak_cooling_latent / results.building_summary.peak_cooling_total) * 100).toFixed(1)}%
                         </span>
                       </div>
-                      <p className="text-3xl font-bold text-purple-600">
+                      <p className="text-2xl font-bold text-cyan-700">
                         {(results.building_summary.peak_cooling_latent / 1000).toFixed(1)}
                       </p>
-                      <p className="text-sm text-purple-700 mt-1">kW</p>
+                      <p className="text-xs text-cyan-600 mt-1">kW</p>
+                    </div>
+
+                    {/* Total Cooling */}
+                    <div className="bg-gray-100 rounded-lg p-5 border border-gray-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-semibold text-gray-800 uppercase tracking-wide">Total Cooling</span>
+                        <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">
+                          {(results.building_summary.peak_cooling_total / 3517).toFixed(1)} tons
+                        </span>
+                      </div>
+                      <p className="text-2xl font-bold text-gray-800">
+                        {(results.building_summary.peak_cooling_total / 1000).toFixed(1)}
+                      </p>
+                      <p className="text-xs text-gray-600 mt-1">kW</p>
                     </div>
                   </div>
                 </div>
@@ -904,20 +855,35 @@ export default function Results() {
                       </div>
                     )}
 
-                    {/* Windows */}
+                    {/* Solar Loads Through Windows */}
+                    {randomSpace.window_area !== undefined && randomSpace.window_area > 0 && (
+                      <div className="bg-yellow-50 p-4 rounded mb-3 border border-yellow-200">
+                        <p className="font-medium text-gray-900 mb-2">☀️ Solar Heat Gain (Direct & Diffuse):</p>
+                        <div className="font-mono text-sm space-y-1 text-gray-700">
+                          <p>Q<sub>solar</sub> = A<sub>win</sub> × SHGC × SC × SCL</p>
+                          <p className="text-xs text-gray-600 mb-2">
+                            SHGC = {randomSpace.shgc || 0.40} (Solar Heat Gain Coefficient)<br/>
+                            SC = {randomSpace.shading_coeff || 1.0} (Shading Coefficient)<br/>
+                            Orientation = {randomSpace.window_orientation || 'South'}<br/>
+                            SCL = {randomSpace.solar_cooling_load || 500} W/m² (Solar Cooling Load for orientation)
+                          </p>
+                          <p>Q<sub>solar</sub> = {randomSpace.window_area.toFixed(1)} m² × {randomSpace.shgc || 0.40} × {randomSpace.shading_coeff || 1.0} × {randomSpace.solar_cooling_load || 500} W/m²</p>
+                          <p className="font-bold text-yellow-700">Q<sub>solar</sub> = {(randomSpace.window_area * (randomSpace.shgc || 0.40) * (randomSpace.shading_coeff || 1.0) * (randomSpace.solar_cooling_load || 500)).toFixed(1)} W</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Window Conduction */}
                     {randomSpace.window_area !== undefined && randomSpace.window_area > 0 && (
                       <div className="bg-blue-50 p-4 rounded mb-3">
-                        <p className="font-medium text-gray-900 mb-2">Windows (Solar + Conduction):</p>
+                        <p className="font-medium text-gray-900 mb-2">Window Conduction:</p>
                         <div className="font-mono text-sm space-y-1 text-gray-700">
-                          <p>Q<sub>solar</sub> = A<sub>win</sub> × SHGC × SCL</p>
-                          <p>Q<sub>solar</sub> = {randomSpace.window_area.toFixed(1)} m² × 0.40 × {randomSpace.solar_cooling_load || 500} W/m²</p>
-                          <p className="font-bold text-blue-700">Q<sub>solar</sub> = {(randomSpace.window_area * 0.40 * (randomSpace.solar_cooling_load || 500)).toFixed(1)} W</p>
-                          <div className="mt-2 pt-2 border-t border-blue-200">
-                            <p>Q<sub>cond</sub> = A<sub>win</sub> × U<sub>win</sub> × ΔT</p>
-                            <p>Q<sub>cond</sub> = {randomSpace.window_area.toFixed(1)} m² × 2.5 W/(m²·K) × {randomSpace.delta_t_window || 8.0}°C</p>
-                            <p className="font-bold text-blue-700">Q<sub>cond</sub> = {(randomSpace.window_area * 2.5 * (randomSpace.delta_t_window || 8.0)).toFixed(1)} W</p>
+                          <p>Q<sub>cond</sub> = A<sub>win</sub> × U<sub>win</sub> × ΔT</p>
+                          <p>Q<sub>cond</sub> = {randomSpace.window_area.toFixed(1)} m² × 2.5 W/(m²·K) × {randomSpace.delta_t_window || 8.0}°C</p>
+                          <p className="font-bold text-blue-700">Q<sub>cond</sub> = {(randomSpace.window_area * 2.5 * (randomSpace.delta_t_window || 8.0)).toFixed(1)} W</p>
+                          <div className="mt-2 pt-2 border-t border-blue-300">
+                            <p className="font-bold text-blue-900">Q<sub>window,total</sub> = Q<sub>solar</sub> + Q<sub>cond</sub> = {(randomSpace.window_area * (randomSpace.shgc || 0.40) * (randomSpace.shading_coeff || 1.0) * (randomSpace.solar_cooling_load || 500) + randomSpace.window_area * 2.5 * (randomSpace.delta_t_window || 8.0)).toFixed(1)} W</p>
                           </div>
-                          <p className="font-bold text-blue-900 pt-2 border-t border-blue-300">Q<sub>window,total</sub> = {(randomSpace.window_area * 0.40 * (randomSpace.solar_cooling_load || 500) + randomSpace.window_area * 2.5 * (randomSpace.delta_t_window || 8.0)).toFixed(1)} W</p>
                         </div>
                       </div>
                     )}
