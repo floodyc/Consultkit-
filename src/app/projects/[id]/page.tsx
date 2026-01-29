@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { api } from '@/lib/api'
 import { applySpaceTypeDefaults, type DesignStandard } from '@/lib/spaceTypeDefaults'
 import dynamic from 'next/dynamic'
+import IESLogo from '@/components/IESLogo'
 
 // Dynamically import OBJViewer to avoid SSR issues with Three.js
 const OBJViewer = dynamic(() => import('@/components/OBJViewer'), { ssr: false })
@@ -326,13 +327,16 @@ export default function ProjectDetail() {
                 {project?.name}
               </h1>
             </div>
-            <button
-              onClick={handleRunCalculation}
-              disabled={calculating || spaces.length === 0}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {calculating ? 'Calculating...' : '🧮 Run Calculation'}
-            </button>
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={handleRunCalculation}
+                disabled={calculating || spaces.length === 0}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {calculating ? 'Calculating...' : '🧮 Run Calculation'}
+              </button>
+              <IESLogo />
+            </div>
           </div>
         </div>
       </nav>
@@ -343,19 +347,19 @@ export default function ProjectDetail() {
           <nav className="flex space-x-8" aria-label="Tabs">
             <button
               onClick={() => router.push(`/projects/${projectId}`)}
-              className="border-b-2 border-indigo-500 py-4 px-1 text-sm font-medium text-indigo-600"
+              className="border-b-4 border-indigo-500 py-5 px-2 text-lg font-bold text-indigo-600"
             >
               Overview
             </button>
             <button
               onClick={() => router.push(`/projects/${projectId}/settings`)}
-              className="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              className="border-b-4 border-transparent py-5 px-2 text-lg font-semibold text-gray-500 hover:text-gray-700 hover:border-gray-300"
             >
               Settings
             </button>
             <button
               onClick={() => router.push(`/projects/${projectId}/results`)}
-              className="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              className="border-b-4 border-transparent py-5 px-2 text-lg font-semibold text-gray-500 hover:text-gray-700 hover:border-gray-300"
             >
               Results
             </button>
@@ -367,35 +371,35 @@ export default function ProjectDetail() {
         <div className="px-4 py-6 sm:px-0">
           <div className="bg-white rounded-lg shadow p-6 mb-6">
             <div className="flex justify-between items-start mb-4">
-              <h3 className="text-lg font-semibold">Project Details</h3>
+              <h3 className="text-xl font-bold">Project Details</h3>
               <div className="flex items-center space-x-2">
-                <label className="text-sm font-medium text-gray-700">Design Standard:</label>
+                <label className="text-base font-medium text-gray-700">Design Standard:</label>
                 <select
                   value={designStandard}
                   onChange={(e) => setDesignStandard(e.target.value as DesignStandard)}
-                  className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+                  className="px-3 py-1 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="ASHRAE_90_1">ASHRAE 90.1-2019</option>
                   <option value="NECB_2020">NECB 2020</option>
                 </select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-2 gap-4 text-base">
               <div>
                 <span className="text-gray-600">Location:</span>{' '}
-                <span className="font-medium">
+                <span className="font-semibold">
                   {project?.location || 'Not specified'}
                 </span>
               </div>
               <div>
                 <span className="text-gray-600">Building Type:</span>{' '}
-                <span className="font-medium capitalize">
+                <span className="font-semibold capitalize">
                   {project?.building_type}
                 </span>
               </div>
               <div className="col-span-2">
                 <span className="text-gray-600">Description:</span>{' '}
-                <span className="font-medium">
+                <span className="font-semibold">
                   {project?.description || 'No description'}
                 </span>
               </div>
