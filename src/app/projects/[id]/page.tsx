@@ -943,6 +943,100 @@ export default function ProjectDetail() {
                     </div>
                   </div>
 
+                  <div className="border-t pt-4">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-3">Solar Loads</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Window Orientation
+                        </label>
+                        <select
+                          value={editingSpace.window_orientation || 'south'}
+                          onChange={(e) =>
+                            setEditingSpace({
+                              ...editingSpace,
+                              window_orientation: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                        >
+                          <option value="north">North</option>
+                          <option value="northeast">Northeast</option>
+                          <option value="east">East</option>
+                          <option value="southeast">Southeast</option>
+                          <option value="south">South</option>
+                          <option value="southwest">Southwest</option>
+                          <option value="west">West</option>
+                          <option value="northwest">Northwest</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Window Area (sq ft)
+                        </label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={editingSpace.window_area || 0}
+                          onChange={(e) =>
+                            setEditingSpace({
+                              ...editingSpace,
+                              window_area: parseFloat(e.target.value) || 0,
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                          placeholder="0.0"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 mt-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          SHGC
+                          <span className="text-xs text-gray-500 ml-1">(Solar Heat Gain Coefficient)</span>
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          max="1"
+                          value={editingSpace.shgc || 0.4}
+                          onChange={(e) =>
+                            setEditingSpace({
+                              ...editingSpace,
+                              shgc: parseFloat(e.target.value) || 0.4,
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                          placeholder="0.40"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Shading Coefficient
+                        </label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          max="1"
+                          value={editingSpace.shading_coeff || 1.0}
+                          onChange={(e) =>
+                            setEditingSpace({
+                              ...editingSpace,
+                              shading_coeff: parseFloat(e.target.value) || 1.0,
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                          placeholder="1.0"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="flex space-x-3">
                     <button
                       type="submit"

@@ -182,13 +182,13 @@ export default function Results() {
       // Call appropriate export API based on format
       if (format === 'pdf') {
         blob = await api.exportPDF(projectId)
-        filename = `${project?.name || 'project'}_HVACplus_Report.pdf`
+        filename = `${project?.name || 'project'}_IES GEM-AI Loads Tool_Report.pdf`
       } else if (format === 'excel') {
         blob = await api.exportExcel(projectId)
-        filename = `${project?.name || 'project'}_HVACplus_Results.xlsx`
+        filename = `${project?.name || 'project'}_IES GEM-AI Loads Tool_Results.xlsx`
       } else if (format === 'gbxml') {
         blob = await api.exportGbXML(projectId)
-        filename = `${project?.name || 'project'}_HVACplus.xml`
+        filename = `${project?.name || 'project'}_IES GEM-AI Loads Tool.xml`
       } else {
         throw new Error('Unknown export format')
       }
