@@ -407,6 +407,104 @@ export default function ProjectDetail() {
             </div>
           </div>
 
+          {/* Calculation Results Summary */}
+          {calculationResults && (
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl shadow-lg p-6 mb-6 border-2 border-green-200">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-gray-900 flex items-center">
+                  <span className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center mr-3">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  </span>
+                  Calculation Results Summary
+                </h3>
+                <button
+                  onClick={() => router.push(`/projects/${projectId}/results`)}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold shadow-md flex items-center"
+                >
+                  View Full Results
+                  <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Key Metrics Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <div className="bg-white rounded-lg p-4 shadow-sm border border-green-100">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs text-gray-600 font-semibold uppercase tracking-wide">Total Area</p>
+                    <span className="text-xl">📐</span>
+                  </div>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {calculationResults.building_summary?.total_floor_area?.toFixed(1) || '0.0'}
+                  </p>
+                  <p className="text-xs text-gray-600 mt-1">m²</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-lg p-4 shadow-sm border border-cyan-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs text-cyan-700 font-semibold uppercase tracking-wide">Peak Cooling</p>
+                    <span className="text-xl">❄️</span>
+                  </div>
+                  <p className="text-2xl font-bold text-cyan-700">
+                    {((calculationResults.building_summary?.peak_cooling_total || 0) / 1000).toFixed(1)}
+                  </p>
+                  <p className="text-xs text-cyan-600 mt-1">
+                    kW ({((calculationResults.building_summary?.peak_cooling_total || 0) / 3517).toFixed(1)} tons)
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-lg p-4 shadow-sm border border-orange-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs text-orange-700 font-semibold uppercase tracking-wide">Peak Heating</p>
+                    <span className="text-xl">🔥</span>
+                  </div>
+                  <p className="text-2xl font-bold text-orange-700">
+                    {((calculationResults.building_summary?.peak_heating || 0) / 1000).toFixed(1)}
+                  </p>
+                  <p className="text-xs text-orange-600 mt-1">kW</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg p-4 shadow-sm border border-purple-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs text-purple-700 font-semibold uppercase tracking-wide">Spaces</p>
+                    <span className="text-xl">🏢</span>
+                  </div>
+                  <p className="text-2xl font-bold text-purple-700">
+                    {calculationResults.space_results?.length || 0}
+                  </p>
+                  <p className="text-xs text-purple-600 mt-1">analyzed</p>
+                </div>
+              </div>
+
+              {/* Quick Stats */}
+              <div className="bg-white rounded-lg p-4 border border-green-100">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Cooling Intensity:</span>
+                    <span className="font-bold text-cyan-700">
+                      {calculationResults.building_summary?.cooling_w_per_m2?.toFixed(1) || '0.0'} W/m²
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Heating Intensity:</span>
+                    <span className="font-bold text-orange-700">
+                      {calculationResults.building_summary?.heating_w_per_m2?.toFixed(1) || '0.0'} W/m²
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Calculated:</span>
+                    <span className="font-medium text-gray-900">
+                      {new Date(calculationResults.calculated_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* GEM-AI Floorplan Upload Section */}
           <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg shadow-md p-6 mb-6 border-2 border-indigo-200">
             <div className="flex items-center justify-between mb-4">
