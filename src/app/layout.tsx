@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'HVACplus - Professional Load Calculations',
+  title: 'IES GEM-AI Loads Tool - Professional Load Calculations',
   description: 'ASHRAE heating and cooling load calculation platform',
 }
 

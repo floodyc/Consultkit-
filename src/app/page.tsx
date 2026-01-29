@@ -39,7 +39,7 @@ export default function Home() {
       <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg">
         <div>
           <h2 className="text-center text-4xl font-bold text-gray-900">
-            HVACplus
+            IES GEM-AI Loads Tool
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Professional ASHRAE Load Calculations
