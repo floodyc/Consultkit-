@@ -114,31 +114,31 @@ services:
 
 databases:
   - name: scopestack-db
-    plan: starter
+    plan: free
     databaseName: scopestack
     user: scopestack_user
 
   - name: retainerpulse-db
-    plan: starter
+    plan: free
     databaseName: retainerpulse
     user: retainerpulse_user
 
   - name: proposalforge-db
-    plan: starter
+    plan: free
     databaseName: proposalforge
     user: proposalforge_user
 
   - name: clientboard-db
-    plan: starter
+    plan: free
     databaseName: clientboard
     user: clientboard_user
 
   - name: leadgate-db
-    plan: starter
+    plan: free
     databaseName: leadgate
     user: leadgate_user
 
   - name: deliverproof-db
-    plan: starter
+    plan: free
     databaseName: deliverproof
     user: deliverproof_user
