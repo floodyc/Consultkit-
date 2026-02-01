@@ -1,0 +1,170 @@
+# Render Blueprint for ConsultKit Backend Services
+# https://render.com/docs/blueprint-spec
+
+services:
+  # HVACplus Backend API
+  - type: web
+    name: hvacplus-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: hvacplus-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: CORS_ORIGINS
+        value: '["https://hvacplus.vercel.app", "https://hvacplus.consultkit.com"]'
+    healthCheckPath: /api/v1/health
+
+  # ScopeStack Backend
+  - type: web
+    name: scopestack-api
+    runtime: python
+    rootDir: saas-portfolio/apps/scopestack/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: scopestack-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+    healthCheckPath: /health
+
+  # RetainerPulse Backend
+  - type: web
+    name: retainerpulse-api
+    runtime: python
+    rootDir: saas-portfolio/apps/retainerpulse/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: retainerpulse-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: STRIPE_SECRET_KEY
+        sync: false
+    healthCheckPath: /health
+
+  # ProposalForge Backend
+  - type: web
+    name: proposalforge-api
+    runtime: python
+    rootDir: saas-portfolio/apps/proposalforge/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: proposalforge-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: STRIPE_SECRET_KEY
+        sync: false
+    healthCheckPath: /health
+
+  # ClientBoard Backend
+  - type: web
+    name: clientboard-api
+    runtime: python
+    rootDir: saas-portfolio/apps/clientboard/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: clientboard-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: STRIPE_SECRET_KEY
+        sync: false
+    healthCheckPath: /health
+
+  # LeadGate Backend
+  - type: web
+    name: leadgate-api
+    runtime: python
+    rootDir: saas-portfolio/apps/leadgate/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: leadgate-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: STRIPE_SECRET_KEY
+        sync: false
+    healthCheckPath: /health
+
+  # DeliverProof Backend
+  - type: web
+    name: deliverproof-api
+    runtime: python
+    rootDir: saas-portfolio/apps/deliverproof/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: deliverproof-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: STRIPE_SECRET_KEY
+        sync: false
+    healthCheckPath: /health
+
+databases:
+  - name: hvacplus-db
+    plan: starter
+    databaseName: hvacplus
+    user: hvacplus_user
+
+  - name: scopestack-db
+    plan: starter
+    databaseName: scopestack
+    user: scopestack_user
+
+  - name: retainerpulse-db
+    plan: starter
+    databaseName: retainerpulse
+    user: retainerpulse_user
+
+  - name: proposalforge-db
+    plan: starter
+    databaseName: proposalforge
+    user: proposalforge_user
+
+  - name: clientboard-db
+    plan: starter
+    databaseName: clientboard
+    user: clientboard_user
+
+  - name: leadgate-db
+    plan: starter
+    databaseName: leadgate
+    user: leadgate_user
+
+  - name: deliverproof-db
+    plan: starter
+    databaseName: deliverproof
+    user: deliverproof_user
