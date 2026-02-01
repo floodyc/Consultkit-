@@ -1,0 +1,29 @@
+# Shared backend requirements for all ConsultKit apps
+# Copy to each app's backend/requirements.txt
+
+# Web Framework
+fastapi==0.109.0
+uvicorn==0.27.0
+
+# Database
+sqlalchemy==2.0.25
+alembic==1.13.1
+psycopg2-binary==2.9.9
+
+# Authentication
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+
+# Validation
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# Payments
+stripe==7.10.0
+
+# Utilities
+python-dotenv==1.0.0
+
+# PDF Generation (optional, for export features)
+# weasyprint==60.2
