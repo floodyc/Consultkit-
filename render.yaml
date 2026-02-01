@@ -1,0 +1,144 @@
+# Render Blueprint for ConsultKit SaaS Portfolio
+# https://render.com/docs/blueprint-spec
+
+services:
+  # ScopeStack Backend
+  - type: web
+    name: scopestack-api
+    runtime: python
+    rootDir: saas-portfolio/apps/scopestack/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: scopestack-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+    healthCheckPath: /health
+
+  # RetainerPulse Backend
+  - type: web
+    name: retainerpulse-api
+    runtime: python
+    rootDir: saas-portfolio/apps/retainerpulse/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: retainerpulse-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: STRIPE_SECRET_KEY
+        sync: false
+    healthCheckPath: /health
+
+  # ProposalForge Backend
+  - type: web
+    name: proposalforge-api
+    runtime: python
+    rootDir: saas-portfolio/apps/proposalforge/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: proposalforge-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: STRIPE_SECRET_KEY
+        sync: false
+    healthCheckPath: /health
+
+  # ClientBoard Backend
+  - type: web
+    name: clientboard-api
+    runtime: python
+    rootDir: saas-portfolio/apps/clientboard/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: clientboard-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: STRIPE_SECRET_KEY
+        sync: false
+    healthCheckPath: /health
+
+  # LeadGate Backend
+  - type: web
+    name: leadgate-api
+    runtime: python
+    rootDir: saas-portfolio/apps/leadgate/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: leadgate-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: STRIPE_SECRET_KEY
+        sync: false
+    healthCheckPath: /health
+
+  # DeliverProof Backend
+  - type: web
+    name: deliverproof-api
+    runtime: python
+    rootDir: saas-portfolio/apps/deliverproof/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: deliverproof-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: STRIPE_SECRET_KEY
+        sync: false
+    healthCheckPath: /health
+
+databases:
+  - name: scopestack-db
+    plan: free
+    databaseName: scopestack
+    user: scopestack_user
+
+  - name: retainerpulse-db
+    plan: free
+    databaseName: retainerpulse
+    user: retainerpulse_user
+
+  - name: proposalforge-db
+    plan: free
+    databaseName: proposalforge
+    user: proposalforge_user
+
+  - name: clientboard-db
+    plan: free
+    databaseName: clientboard
+    user: clientboard_user
+
+  - name: leadgate-db
+    plan: free
+    databaseName: leadgate
+    user: leadgate_user
+
+  - name: deliverproof-db
+    plan: free
+    databaseName: deliverproof
+    user: deliverproof_user
