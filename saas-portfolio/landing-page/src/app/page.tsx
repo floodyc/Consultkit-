@@ -1,11 +1,11 @@
 'use client'
 
 import {
-  Shield,
+  FolderOpen,
   Clock,
   FileText,
   LayoutDashboard,
-  Filter,
+  Shield,
   CheckCircle2,
   ArrowRight,
   ChevronDown
@@ -13,14 +13,14 @@ import {
 
 const apps = [
   {
-    id: 'leadgate',
-    name: 'LeadGate',
-    tagline: 'Stop wasting calls on bad-fit leads',
-    description: 'Qualify leads before you get on a call. Smart intake forms with scoring route qualified leads to your calendar and bad fits to resources.',
+    id: 'projectstart',
+    name: 'ProjectStart',
+    tagline: 'Kick off projects the right way',
+    description: 'Capture project info, team contacts, and roles in one place. Share with clients. The source of truth for every engagement.',
     price: 'CAD $29/mo',
-    icon: Filter,
-    color: 'bg-blue-500',
-    href: 'https://leadgate.consultkit.com'
+    icon: FolderOpen,
+    color: 'bg-emerald-500',
+    href: 'https://projectstart.consultkit.com'
   },
   {
     id: 'proposalforge',
@@ -43,16 +43,6 @@ const apps = [
     href: 'https://scopestack.consultkit.com'
   },
   {
-    id: 'clientboard',
-    name: 'ClientBoard',
-    tagline: 'End "where are we?" emails forever',
-    description: 'Give clients a simple status portal. Post async updates. They see progress without calling you. Weekly digests keep them informed.',
-    price: 'CAD $29/mo',
-    icon: LayoutDashboard,
-    color: 'bg-green-500',
-    href: 'https://clientboard.consultkit.com'
-  },
-  {
     id: 'retainerpulse',
     name: 'RetainerPulse',
     tagline: 'Track retainer hours with client visibility',
@@ -61,6 +51,16 @@ const apps = [
     icon: Clock,
     color: 'bg-cyan-500',
     href: 'https://retainerpulse.consultkit.com'
+  },
+  {
+    id: 'clientboard',
+    name: 'ClientBoard',
+    tagline: 'End "where are we?" emails forever',
+    description: 'Give clients a simple status portal. Post async updates. They see progress without calling you. Weekly digests keep them informed.',
+    price: 'CAD $29/mo',
+    icon: LayoutDashboard,
+    color: 'bg-green-500',
+    href: 'https://clientboard.consultkit.com'
   },
   {
     id: 'deliverproof',
@@ -76,6 +76,13 @@ const apps = [
 
 const bundles = [
   {
+    name: 'Project Kickoff',
+    apps: ['ProjectStart', 'ProposalForge'],
+    discount: '20%',
+    price: 'CAD $70/mo',
+    originalPrice: 'CAD $88'
+  },
+  {
     name: 'Scope Protection',
     apps: ['ScopeStack', 'DeliverProof'],
     discount: '20%',
@@ -88,13 +95,6 @@ const bundles = [
     discount: '20%',
     price: 'CAD $54/mo',
     originalPrice: 'CAD $68'
-  },
-  {
-    name: 'Sales Machine',
-    apps: ['LeadGate', 'ProposalForge'],
-    discount: '20%',
-    price: 'CAD $70/mo',
-    originalPrice: 'CAD $88'
   },
   {
     name: 'Full Suite',
@@ -147,10 +147,10 @@ export default function LandingPage() {
                 <ChevronDown className="ml-2 h-5 w-5" />
               </a>
               <a
-                href="#scopestack"
+                href="#projectstart"
                 className="border-2 border-gray-900 text-gray-900 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100"
               >
-                Start with ScopeStack
+                Start with ProjectStart
               </a>
             </div>
           </div>
@@ -168,16 +168,16 @@ export default function LandingPage() {
             No features you'll never use.
           </p>
           <div className="flex flex-wrap justify-center items-center gap-4 text-sm">
-            <span className="bg-white px-4 py-2 rounded-full text-gray-600">Lead comes in</span>
+            <span className="bg-white px-4 py-2 rounded-full text-gray-600">New project</span>
             <ArrowRight className="h-4 w-4 text-gray-400" />
-            <span className="bg-blue-100 text-blue-800 px-4 py-2 rounded-full font-medium">LeadGate</span>
+            <span className="bg-emerald-100 text-emerald-800 px-4 py-2 rounded-full font-medium">ProjectStart</span>
             <ArrowRight className="h-4 w-4 text-gray-400" />
             <span className="bg-purple-100 text-purple-800 px-4 py-2 rounded-full font-medium">ProposalForge</span>
             <ArrowRight className="h-4 w-4 text-gray-400" />
             <span className="bg-orange-100 text-orange-800 px-4 py-2 rounded-full font-medium">ScopeStack</span>
             <ArrowRight className="h-4 w-4 text-gray-400" />
-            <span className="bg-green-100 text-green-800 px-4 py-2 rounded-full font-medium">ClientBoard</span>
             <span className="bg-cyan-100 text-cyan-800 px-4 py-2 rounded-full font-medium">RetainerPulse</span>
+            <span className="bg-green-100 text-green-800 px-4 py-2 rounded-full font-medium">ClientBoard</span>
             <ArrowRight className="h-4 w-4 text-gray-400" />
             <span className="bg-red-100 text-red-800 px-4 py-2 rounded-full font-medium">DeliverProof</span>
             <ArrowRight className="h-4 w-4 text-gray-400" />
@@ -273,7 +273,7 @@ export default function LandingPage() {
               <h3 className="text-xl font-bold text-gray-900 mb-4">Pick Your Pain</h3>
               <p className="text-gray-600">
                 Start with the app that solves your most expensive problem.
-                Most agencies start with ScopeStack or ProposalForge.
+                Most agencies start with ProjectStart or ScopeStack.
               </p>
             </div>
             <div className="text-center">
@@ -310,11 +310,11 @@ export default function LandingPage() {
             Every tool has a 14-day free trial. No credit card required to start.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
+            <a href="#projectstart" className="bg-emerald-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-emerald-600">
+              Project Kickoff
+            </a>
             <a href="#scopestack" className="bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-600">
               Scope Creep
-            </a>
-            <a href="#proposalforge" className="bg-purple-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-600">
-              Slow Proposals
             </a>
             <a href="#clientboard" className="bg-green-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-600">
               Status Updates
@@ -339,11 +339,11 @@ export default function LandingPage() {
             <div>
               <h4 className="font-semibold text-gray-900 mb-4">Apps</h4>
               <ul className="space-y-2 text-sm text-gray-600">
-                <li><a href="#leadgate" className="hover:text-gray-900">LeadGate</a></li>
+                <li><a href="#projectstart" className="hover:text-gray-900">ProjectStart</a></li>
                 <li><a href="#proposalforge" className="hover:text-gray-900">ProposalForge</a></li>
                 <li><a href="#scopestack" className="hover:text-gray-900">ScopeStack</a></li>
-                <li><a href="#clientboard" className="hover:text-gray-900">ClientBoard</a></li>
                 <li><a href="#retainerpulse" className="hover:text-gray-900">RetainerPulse</a></li>
+                <li><a href="#clientboard" className="hover:text-gray-900">ClientBoard</a></li>
                 <li><a href="#deliverproof" className="hover:text-gray-900">DeliverProof</a></li>
               </ul>
             </div>
