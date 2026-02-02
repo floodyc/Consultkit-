@@ -17,7 +17,7 @@ const apps = [
     name: 'ProjectStart',
     tagline: 'Kick off projects the right way',
     description: 'Capture project info, team contacts, and roles in one place. Share with clients. The source of truth for every engagement.',
-    price: 'CAD $29/mo',
+    price: 'Free',
     icon: FolderOpen,
     color: 'bg-emerald-500',
     href: 'https://projectstart.consultkit.com'
@@ -77,10 +77,10 @@ const apps = [
 const bundles = [
   {
     name: 'Project Kickoff',
-    apps: ['ProjectStart', 'ProposalForge'],
-    discount: '20%',
-    price: 'CAD $70/mo',
-    originalPrice: 'CAD $88'
+    apps: ['ProjectStart (Free)', 'ProposalForge'],
+    discount: '—',
+    price: 'CAD $59/mo',
+    originalPrice: 'ProjectStart free'
   },
   {
     name: 'Scope Protection',

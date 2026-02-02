@@ -4,7 +4,7 @@
 
 ProjectStart is the kickoff hub for new client projects. It captures essential project information, team contacts, roles, and creates a shared reference point that all other ConsultKit apps can pull from.
 
-**Price:** CAD $29/mo
+**Price:** Free (no credit card required)
 
 ## Architecture Overview
 
@@ -151,9 +151,14 @@ ProjectStart serves as the "source of truth" for project info across ConsultKit:
 - **ClientBoard** → Sends updates to project contacts
 - **DeliverProof** → Routes approvals to designated approvers
 
+## Pricing
+
+ProjectStart is **completely free** - no credit card required, no paid tiers.
+
+This is intentional: ProjectStart serves as the entry point to the ConsultKit ecosystem. Users who organize their projects here are more likely to adopt paid apps like ScopeStack, ClientBoard, and DeliverProof.
+
 ## Abuse Controls
 
-- Free plan: 2 active projects, 5 contacts per project
-- Starter plan: 10 active projects, unlimited contacts
-- Pro plan: Unlimited projects and contacts
+- Unlimited projects and contacts
 - Rate limit: 100 API calls/minute
+- File uploads limited to 10MB per project brief
