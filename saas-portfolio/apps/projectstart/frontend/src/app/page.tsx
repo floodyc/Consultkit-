@@ -1,263 +1,174 @@
 'use client'
 
 import { useState } from 'react'
-import { FolderOpen, Plus, Users, Mail, Phone, Building, Calendar, MoreVertical, Share2, FileText } from 'lucide-react'
+import { FolderOpen, Mail, ArrowRight, Check } from 'lucide-react'
 
-interface Contact {
-  id: string
-  name: string
-  email: string
-  phone: string
-  role: string
-  roleColor: string
-  isPrimary: boolean
-}
+export default function LoginPage() {
+  const [email, setEmail] = useState('')
+  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
-interface Project {
-  id: string
-  name: string
-  clientName: string
-  status: 'draft' | 'active' | 'on_hold' | 'completed'
-  startDate: string
-  projectType: string
-  contacts: Contact[]
-}
-
-const mockProjects: Project[] = [
-  {
-    id: '1',
-    name: 'Website Redesign',
-    clientName: 'TechCorp Inc.',
-    status: 'active',
-    startDate: 'Jan 15, 2025',
-    projectType: 'Fixed',
-    contacts: [
-      { id: '1', name: 'John Smith', email: 'john@techcorp.com', phone: '555-0101', role: 'Primary Contact', roleColor: 'bg-blue-100 text-blue-800', isPrimary: true },
-      { id: '2', name: 'Sarah Johnson', email: 'sarah@techcorp.com', phone: '555-0102', role: 'Approver', roleColor: 'bg-green-100 text-green-800', isPrimary: false },
-    ]
-  },
-  {
-    id: '2',
-    name: 'Brand Strategy',
-    clientName: 'StartupXYZ',
-    status: 'active',
-    startDate: 'Feb 1, 2025',
-    projectType: 'Retainer',
-    contacts: [
-      { id: '3', name: 'Mike Chen', email: 'mike@startupxyz.com', phone: '555-0201', role: 'Primary Contact', roleColor: 'bg-blue-100 text-blue-800', isPrimary: true },
-    ]
-  },
-  {
-    id: '3',
-    name: 'Q1 Marketing Campaign',
-    clientName: 'BigCo',
-    status: 'draft',
-    startDate: 'Feb 10, 2025',
-    projectType: 'Fixed',
-    contacts: []
-  },
-]
-
-const statusConfig = {
-  draft: { label: 'Draft', color: 'bg-gray-100 text-gray-800' },
-  active: { label: 'Active', color: 'bg-green-100 text-green-800' },
-  on_hold: { label: 'On Hold', color: 'bg-yellow-100 text-yellow-800' },
-  completed: { label: 'Completed', color: 'bg-blue-100 text-blue-800' },
-}
-
-export default function Dashboard() {
-  const [projects] = useState<Project[]>(mockProjects)
-  const [selectedProject, setSelectedProject] = useState<Project | null>(mockProjects[0])
-
-  const stats = {
-    total: projects.length,
-    active: projects.filter(p => p.status === 'active').length,
-    totalContacts: projects.reduce((acc, p) => acc + p.contacts.length, 0),
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    setIsSubmitted(true)
+    setIsLoading(false)
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Sidebar */}
-      <aside className="fixed inset-y-0 left-0 w-64 bg-gray-900">
-        <div className="flex items-center gap-2 px-6 py-4 border-b border-gray-800">
-          <FolderOpen className="h-8 w-8 text-emerald-500" />
-          <span className="text-xl font-bold text-white">ProjectStart</span>
-        </div>
-        <nav className="px-4 py-6 space-y-2">
-          <a href="#" className="flex items-center gap-3 px-3 py-2 text-white bg-gray-800 rounded-lg">
-            <FolderOpen className="h-5 w-5" />
-            Projects
-          </a>
-          <a href="#" className="flex items-center gap-3 px-3 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg">
-            <Users className="h-5 w-5" />
-            Contacts
-          </a>
-        </nav>
-      </aside>
-
-      {/* Main Content */}
-      <main className="ml-64 p-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Projects</h1>
-            <p className="text-gray-600">Manage project info and team contacts.</p>
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Left Side - Branding */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gray-900 p-12 flex-col justify-between">
+        <div>
+          <div className="flex items-center gap-3">
+            <FolderOpen className="h-10 w-10 text-emerald-500" />
+            <span className="text-2xl font-bold text-white">ProjectStart</span>
           </div>
-          <button className="flex items-center gap-2 bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600">
-            <Plus className="h-5 w-5" />
-            New Project
-          </button>
+          <p className="text-gray-400 mt-2">Part of ConsultKit</p>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <p className="text-sm text-gray-600 mb-1">Total Projects</p>
-            <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <p className="text-sm text-gray-600 mb-1">Active</p>
-            <p className="text-3xl font-bold text-emerald-600">{stats.active}</p>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <p className="text-sm text-gray-600 mb-1">Total Contacts</p>
-            <p className="text-3xl font-bold text-gray-900">{stats.totalContacts}</p>
-          </div>
-        </div>
+        <div className="space-y-8">
+          <h1 className="text-4xl font-bold text-white leading-tight">
+            Kick off every project<br />the right way
+          </h1>
+          <p className="text-xl text-gray-400">
+            Capture contacts, roles, and project details in one place.
+            Share with clients. Stay organized from day one.
+          </p>
 
-        <div className="grid grid-cols-3 gap-6">
-          {/* Projects List */}
-          <div className="col-span-1 bg-white rounded-lg shadow-sm border border-gray-200">
-            <div className="px-4 py-3 border-b border-gray-200">
-              <h2 className="font-semibold text-gray-900">All Projects</h2>
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 text-gray-300">
+              <Check className="h-5 w-5 text-emerald-500" />
+              <span>Free forever - no credit card required</span>
             </div>
-            <div className="divide-y divide-gray-100">
-              {projects.map((project) => (
+            <div className="flex items-center gap-3 text-gray-300">
+              <Check className="h-5 w-5 text-emerald-500" />
+              <span>Unlimited projects and contacts</span>
+            </div>
+            <div className="flex items-center gap-3 text-gray-300">
+              <Check className="h-5 w-5 text-emerald-500" />
+              <span>Shareable client view links</span>
+            </div>
+            <div className="flex items-center gap-3 text-gray-300">
+              <Check className="h-5 w-5 text-emerald-500" />
+              <span>Export project briefs as PDF</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="text-gray-500 text-sm">
+          &copy; 2026 ConsultKit. All rights reserved.
+        </div>
+      </div>
+
+      {/* Right Side - Login Form */}
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
+          {/* Mobile Logo */}
+          <div className="lg:hidden flex items-center gap-3 mb-8">
+            <FolderOpen className="h-10 w-10 text-emerald-500" />
+            <span className="text-2xl font-bold text-gray-900">ProjectStart</span>
+          </div>
+
+          {!isSubmitted ? (
+            <>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                Get started free
+              </h2>
+              <p className="text-gray-600 mb-8">
+                Enter your email to sign in or create an account
+              </p>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                    Work email
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@company.com"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                      required
+                    />
+                  </div>
+                </div>
+
                 <button
-                  key={project.id}
-                  onClick={() => setSelectedProject(project)}
-                  className={`w-full px-4 py-3 text-left hover:bg-gray-50 ${selectedProject?.id === project.id ? 'bg-emerald-50 border-l-2 border-emerald-500' : ''}`}
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-emerald-500 text-white py-3 rounded-lg font-semibold hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-medium text-gray-900">{project.name}</p>
-                      <p className="text-sm text-gray-500">{project.clientName}</p>
-                    </div>
-                    <span className={`text-xs font-medium px-2 py-1 rounded ${statusConfig[project.status].color}`}>
-                      {statusConfig[project.status].label}
-                    </span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Project Details */}
-          <div className="col-span-2 space-y-6">
-            {selectedProject ? (
-              <>
-                {/* Project Info */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h2 className="text-xl font-bold text-gray-900">{selectedProject.name}</h2>
-                      <p className="text-gray-600 flex items-center gap-2 mt-1">
-                        <Building className="h-4 w-4" />
-                        {selectedProject.clientName}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded">
-                        <Share2 className="h-5 w-5" />
-                      </button>
-                      <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded">
-                        <FileText className="h-5 w-5" />
-                      </button>
-                      <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded">
-                        <MoreVertical className="h-5 w-5" />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <p className="text-gray-500">Status</p>
-                      <span className={`inline-block mt-1 text-xs font-medium px-2 py-1 rounded ${statusConfig[selectedProject.status].color}`}>
-                        {statusConfig[selectedProject.status].label}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Start Date</p>
-                      <p className="text-gray-900 flex items-center gap-1 mt-1">
-                        <Calendar className="h-4 w-4" />
-                        {selectedProject.startDate}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Project Type</p>
-                      <p className="text-gray-900 mt-1">{selectedProject.projectType}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Contacts */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                  <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                    <h3 className="font-semibold text-gray-900">Team Contacts</h3>
-                    <button className="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1">
-                      <Plus className="h-4 w-4" />
-                      Add Contact
-                    </button>
-                  </div>
-                  {selectedProject.contacts.length > 0 ? (
-                    <div className="divide-y divide-gray-100">
-                      {selectedProject.contacts.map((contact) => (
-                        <div key={contact.id} className="px-6 py-4 flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-medium">
-                              {contact.name.split(' ').map(n => n[0]).join('')}
-                            </div>
-                            <div>
-                              <p className="font-medium text-gray-900 flex items-center gap-2">
-                                {contact.name}
-                                {contact.isPrimary && (
-                                  <span className="text-xs bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">Primary</span>
-                                )}
-                              </p>
-                              <span className={`text-xs font-medium px-2 py-0.5 rounded ${contact.roleColor}`}>
-                                {contact.role}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4 text-sm text-gray-500">
-                            <span className="flex items-center gap-1">
-                              <Mail className="h-4 w-4" />
-                              {contact.email}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Phone className="h-4 w-4" />
-                              {contact.phone}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                  {isLoading ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
-                    <div className="px-6 py-12 text-center text-gray-500">
-                      <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                      <p>No contacts yet</p>
-                      <p className="text-sm">Add team members and stakeholders</p>
-                    </div>
+                    <>
+                      Continue with email
+                      <ArrowRight className="h-5 w-5" />
+                    </>
                   )}
+                </button>
+              </form>
+
+              <div className="mt-6">
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-200" />
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-4 bg-gray-50 text-gray-500">or</span>
+                  </div>
                 </div>
-              </>
-            ) : (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center text-gray-500">
-                <FolderOpen className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                <p>Select a project to view details</p>
+
+                <button className="mt-6 w-full border border-gray-300 bg-white text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50 flex items-center justify-center gap-3">
+                  <svg className="h-5 w-5" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  </svg>
+                  Continue with Google
+                </button>
               </div>
-            )}
-          </div>
+
+              <p className="mt-8 text-center text-sm text-gray-500">
+                By continuing, you agree to our{' '}
+                <a href="#" className="text-emerald-600 hover:underline">Terms of Service</a>
+                {' '}and{' '}
+                <a href="#" className="text-emerald-600 hover:underline">Privacy Policy</a>
+              </p>
+            </>
+          ) : (
+            <div className="text-center">
+              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Mail className="h-8 w-8 text-emerald-600" />
+              </div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                Check your email
+              </h2>
+              <p className="text-gray-600 mb-6">
+                We sent a magic link to<br />
+                <span className="font-medium text-gray-900">{email}</span>
+              </p>
+              <p className="text-sm text-gray-500">
+                Click the link in the email to sign in. No password needed.
+              </p>
+              <button
+                onClick={() => setIsSubmitted(false)}
+                className="mt-8 text-emerald-600 hover:underline font-medium"
+              >
+                Use a different email
+              </button>
+            </div>
+          )}
         </div>
-      </main>
+      </div>
     </div>
   )
 }
